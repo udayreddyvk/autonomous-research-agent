@@ -7,6 +7,9 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;650;750;850&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --paper: #09040f;
@@ -24,6 +27,8 @@
             --hot: #ff2f7d;
             --violet: #9c5cff;
             --shadow: 0 34px 95px rgba(0, 0, 0, 0.64);
+            --font-display: "Space Grotesk", sans-serif;
+            --font-body: "Manrope", sans-serif;
         }
 
         * {
@@ -34,7 +39,7 @@
             margin: 0;
             min-height: 100vh;
             color: var(--ink);
-            font-family: "Segoe UI", "Aptos", sans-serif;
+            font-family: var(--font-body);
             background:
                 radial-gradient(circle at 8% 8%, rgba(255, 47, 125, 0.32), transparent 26%),
                 radial-gradient(circle at 86% 4%, rgba(0, 224, 199, 0.22), transparent 28%),
@@ -172,36 +177,85 @@
         }
 
         .topbar {
-            display: flex;
-            justify-content: space-between;
-            gap: 24px;
-            align-items: flex-end;
-            padding: 24px 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.52fr);
+            gap: 28px;
+            align-items: end;
+            padding: 28px 0 30px;
         }
 
         .brand-kicker {
             color: var(--amber);
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
         }
 
         h1 {
-            margin: 4px 0 0;
-            font-size: clamp(2.1rem, 5vw, 4.7rem);
-            line-height: 0.95;
-            letter-spacing: 0;
-            text-transform: uppercase;
+            margin: 10px 0 0;
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 7.6vw, 7.2rem);
+            line-height: 0.86;
+            letter-spacing: -0.075em;
             text-shadow:
                 0 0 34px rgba(255, 47, 125, 0.35),
                 0 22px 56px rgba(0, 0, 0, 0.68);
         }
 
-        .top-note {
-            max-width: 480px;
+        .hero-pitch {
+            border: 1px solid rgba(255, 247, 251, 0.16);
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0, 224, 199, 0.16), transparent 34%),
+                linear-gradient(145deg, rgba(255, 47, 125, 0.12), rgba(12, 6, 22, 0.82));
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+            padding: 20px;
+        }
+
+        .pitch-kicker {
+            color: var(--teal);
+            font-size: 0.74rem;
+            font-weight: 850;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .pitch-title {
+            margin-top: 8px;
+            color: var(--ink);
+            font-family: var(--font-display);
+            font-size: 1.22rem;
+            font-weight: 700;
+        }
+
+        .pitch-list {
+            display: grid;
+            gap: 10px;
+            margin: 16px 0 0;
+            padding: 0;
+            list-style: none;
             color: var(--muted);
-            line-height: 1.55;
+            line-height: 1.35;
+        }
+
+        .pitch-list li {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .pitch-list span {
+            display: grid;
+            width: 28px;
+            height: 28px;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 247, 251, 0.08);
+            color: var(--teal);
+            font-weight: 850;
         }
 
         .workbench {
@@ -227,6 +281,7 @@
         .control-panel {
             padding: 20px;
             margin-bottom: 22px;
+            margin-top: 2px;
             background:
                 linear-gradient(145deg, rgba(255, 47, 125, 0.12), transparent 38%),
                 linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
@@ -242,10 +297,10 @@
         label {
             display: block;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
             font-size: 0.82rem;
-            font-weight: 800;
-            margin-bottom: 7px;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            margin-bottom: 9px;
             text-transform: uppercase;
         }
 
@@ -351,14 +406,14 @@
         }
 
         .mode-name {
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 850;
             margin-bottom: 6px;
         }
 
         .mode-copy {
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.84rem;
             line-height: 1.35;
         }
@@ -376,7 +431,7 @@
             align-items: center;
             gap: 9px;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 650;
         }
 
@@ -414,7 +469,7 @@
         .message {
             margin-top: 12px;
             color: var(--red);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 700;
         }
 
@@ -452,7 +507,7 @@
             background: rgba(255, 255, 255, 0.07);
             color: var(--amber);
             padding: 7px 12px;
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.82rem;
             font-weight: 800;
         }
@@ -465,7 +520,7 @@
             display: flex;
             justify-content: space-between;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.88rem;
             margin-bottom: 8px;
         }
@@ -499,7 +554,7 @@
             color: var(--ink);
             cursor: pointer;
             padding: 8px 14px;
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 800;
         }
 
@@ -520,14 +575,14 @@
             min-height: 420px;
             place-items: center;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             text-align: center;
         }
 
         .empty-state strong {
             display: block;
             color: var(--ink);
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: var(--font-display);
             font-size: 1.7rem;
             margin-bottom: 8px;
         }
@@ -710,7 +765,7 @@
         .source {
             margin-top: 8px;
             color: var(--blue);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.84rem;
             overflow-wrap: anywhere;
         }
@@ -718,7 +773,7 @@
         .confidence {
             margin-top: 6px;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.78rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -732,7 +787,7 @@
 
         .side-title {
             margin: 0 0 14px;
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.92rem;
             font-weight: 900;
             letter-spacing: 0.08em;
@@ -759,7 +814,7 @@
             place-items: center;
             background: rgba(255, 255, 255, 0.1);
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 900;
         }
 
@@ -774,13 +829,13 @@
         }
 
         .phase-name {
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 850;
         }
 
         .phase-copy {
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.85rem;
             margin-top: 2px;
         }
@@ -807,7 +862,7 @@
 
         .stat-label {
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.78rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -874,7 +929,7 @@
         .possibility {
             margin-bottom: 12px;
             color: var(--muted);
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-size: 0.9rem;
             line-height: 1.45;
         }
@@ -889,7 +944,7 @@
             background: rgba(179, 58, 58, 0.08);
             color: var(--red);
             padding: 14px;
-            font-family: "Segoe UI", sans-serif;
+            font-family: var(--font-body);
             font-weight: 700;
         }
 
@@ -914,6 +969,17 @@
             .report-title-row,
             .run-row {
                 display: block;
+            }
+
+            h1 {
+                font-size: clamp(2.8rem, 17vw, 4.8rem);
+                letter-spacing: -0.07em;
+            }
+
+            .hero-pitch {
+                margin-top: 18px;
+                border-radius: 18px;
+                padding: 16px;
             }
 
             .mode-grid,
@@ -1101,10 +1167,21 @@
                 h("section", { className: "topbar" },
                     h("div", null,
                         h("div", { className: "brand-kicker" }, "Autonomous Research Desk"),
-                        h("h1", null, "Make the internet confess")
+                        h("h1", null,
+                            "Ask The Web.",
+                            h("br"),
+                            "Get Receipts."
+                        )
                     ),
-                    h("p", { className: "top-note" },
-                        "Unlike a regular chatbot reply, this workspace searches the web, keeps source evidence, shows progress, and turns findings into a traceable report you can inspect."
+                    h("aside", { className: "hero-pitch", "aria-label": "Why this research workspace is useful" },
+                        h("div", { className: "pitch-kicker" }, "Not another chatbot answer"),
+                        h("div", { className: "pitch-title" }, "Built for traceable research."),
+                        h("ul", { className: "pitch-list" },
+                            h("li", null, h("span", null, "1"), "Searches the live web"),
+                            h("li", null, h("span", null, "2"), "Collects source evidence"),
+                            h("li", null, h("span", null, "3"), "Shows progress while it works"),
+                            h("li", null, h("span", null, "4"), "Builds a report you can inspect")
+                        )
                     )
                 ),
                 h("section", { className: "control-panel panel" },
