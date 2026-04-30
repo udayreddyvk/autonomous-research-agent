@@ -9,9 +9,23 @@ from collections import Counter
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from ddgs import DDGS
-from firecrawl import FirecrawlApp
-from openai import AsyncOpenAI
+try:
+    from ddgs import DDGS
+except Exception as exc:
+    print(f"[startup] DuckDuckGo search unavailable: {exc}")
+    DDGS = None
+
+try:
+    from firecrawl import FirecrawlApp
+except Exception as exc:
+    print(f"[startup] Firecrawl unavailable: {exc}")
+    FirecrawlApp = None
+
+try:
+    from openai import AsyncOpenAI
+except Exception as exc:
+    print(f"[startup] OpenAI-compatible client unavailable: {exc}")
+    AsyncOpenAI = None
 
 from config import Config
 
@@ -20,15 +34,19 @@ _firecrawl = None
 _openai = None
 
 
-def _get_firecrawl() -> FirecrawlApp:
+def _get_firecrawl() -> Any:
     global _firecrawl
+    if FirecrawlApp is None:
+        return None
     if _firecrawl is None and Config.firecrawl_api_key:
         _firecrawl = FirecrawlApp(api_key=Config.firecrawl_api_key)
     return _firecrawl
 
 
-def _get_openai() -> AsyncOpenAI:
+def _get_openai() -> Any:
     global _openai
+    if AsyncOpenAI is None:
+        return None
     if _openai is None and Config.kimi_api_key:
         _openai = AsyncOpenAI(
             api_key=Config.kimi_api_key,
@@ -40,6 +58,8 @@ def _get_openai() -> AsyncOpenAI:
 def search_web(query: str, max_results: int = 5) -> List[Dict[str, str]]:
     """Search DuckDuckGo and return structured results."""
     try:
+        if DDGS is None:
+            return []
         with DDGS() as ddgs:
             results = ddgs.text(query, max_results=max_results)
             return [

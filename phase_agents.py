@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from config import Config
 from swarm_orchestrator import orchestrator, ResearchSession
 from tools import (
     search_web,
@@ -336,7 +337,7 @@ class Phase3Agent(BaseAgent):
                 c if c.isalnum() or c in "-_" else "_"
                 for c in session.topic.lower().replace(" ", "_")
             )[:30]
-            report_path = f"reports/{topic_slug}_{timestamp}.md"
+            report_path = str(Path(Config.report_path) / f"{topic_slug}_{timestamp}.md")
 
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)

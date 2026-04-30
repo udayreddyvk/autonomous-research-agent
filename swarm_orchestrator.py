@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 from dataclasses import dataclass, asdict
 
+from config import Config
+
 
 @dataclass
 class ResearchSession:
@@ -31,11 +33,11 @@ class ResearchSession:
 class SwarmOrchestrator:
     """Coordinates agent swarms through research phases."""
 
-    def __init__(self, db_path: str = "logs/research.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        self.db_path = db_path or Config.database_path
         self.sessions: Dict[str, ResearchSession] = {}
-        Path("logs").mkdir(exist_ok=True)
-        Path("reports").mkdir(exist_ok=True)
+        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(Config.report_path).mkdir(parents=True, exist_ok=True)
         self._init_db()
         self._load_sessions()
 
