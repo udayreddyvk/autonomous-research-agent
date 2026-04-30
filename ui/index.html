@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Desk</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --paper: #09040f;
+            --panel: rgba(24, 12, 32, 0.82);
+            --panel-hot: rgba(255, 47, 125, 0.1);
+            --ink: #fff7fb;
+            --muted: #cdb6c4;
+            --line: rgba(255, 247, 251, 0.14);
+            --teal: #00e0c7;
+            --teal-dark: #00a997;
+            --amber: #ffba52;
+            --blue: #7c5cff;
+            --red: #ff4f78;
+            --green: #42f0a4;
+            --hot: #ff2f7d;
+            --violet: #9c5cff;
+            --shadow: 0 34px 95px rgba(0, 0, 0, 0.64);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: "Segoe UI", "Aptos", sans-serif;
+            background:
+                radial-gradient(circle at 8% 8%, rgba(255, 47, 125, 0.32), transparent 26%),
+                radial-gradient(circle at 86% 4%, rgba(0, 224, 199, 0.22), transparent 28%),
+                radial-gradient(circle at 52% 92%, rgba(124, 92, 255, 0.28), transparent 35%),
+                linear-gradient(135deg, rgba(255, 247, 251, 0.055) 1px, transparent 1px),
+                linear-gradient(145deg, #09040f 0%, #150719 48%, #06030b 100%);
+            background-size: auto, auto, auto, 28px 28px, auto;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.18;
+            filter: blur(0.2px);
+        }
+
+        body::before {
+            width: 520px;
+            height: 520px;
+            right: -90px;
+            top: 120px;
+            border: 2px solid rgba(255, 247, 251, 0.36);
+            border-radius: 48% 52% 44% 56%;
+            transform: rotate(-22deg);
+            box-shadow:
+                inset 70px -40px 0 rgba(255, 47, 125, 0.18),
+                inset -90px 70px 0 rgba(0, 224, 199, 0.12),
+                0 0 90px rgba(255, 47, 125, 0.22);
+        }
+
+        body::after {
+            width: 430px;
+            height: 260px;
+            left: -80px;
+            bottom: 80px;
+            border: 2px solid rgba(255, 186, 82, 0.38);
+            border-radius: 58% 42% 60% 40%;
+            transform: rotate(18deg);
+            box-shadow:
+                inset 56px 22px 0 rgba(124, 92, 255, 0.18),
+                0 0 72px rgba(0, 224, 199, 0.13);
+        }
+
+        .watermark-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .watermark-pose {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            opacity: 0.18;
+            transform: rotate(var(--turn));
+        }
+
+        .watermark-pose::before,
+        .watermark-pose::after {
+            content: "";
+            position: absolute;
+            border: 2px solid rgba(255, 247, 251, 0.25);
+            box-shadow: 0 0 36px rgba(255, 47, 125, 0.16);
+        }
+
+        .watermark-pose::before {
+            width: 220px;
+            height: 140px;
+            left: 24px;
+            top: 74px;
+            border-radius: 50%;
+            transform: rotate(-20deg);
+        }
+
+        .watermark-pose::after {
+            width: 72px;
+            height: 72px;
+            right: 42px;
+            top: 52px;
+            border-color: rgba(0, 224, 199, 0.38);
+            border-radius: 50%;
+        }
+
+        .watermark-pose span {
+            position: absolute;
+            left: 50%;
+            bottom: 42px;
+            transform: translateX(-50%);
+            color: rgba(255, 247, 251, 0.34);
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .pose-lotus {
+            --turn: -15deg;
+            right: 8%;
+            top: 8%;
+        }
+
+        .pose-arch {
+            --turn: 17deg;
+            left: 5%;
+            top: 42%;
+        }
+
+        .pose-embrace {
+            --turn: -8deg;
+            right: 18%;
+            bottom: 2%;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+        }
+
+        .app {
+            width: min(1500px, calc(100vw - 32px));
+            margin: 0 auto;
+            padding: 24px 0 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: flex-end;
+            padding: 24px 0;
+        }
+
+        .brand-kicker {
+            color: var(--amber);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 4px 0 0;
+            font-size: clamp(2.1rem, 5vw, 4.7rem);
+            line-height: 0.95;
+            letter-spacing: 0;
+            text-transform: uppercase;
+            text-shadow:
+                0 0 34px rgba(255, 47, 125, 0.35),
+                0 22px 56px rgba(0, 0, 0, 0.68);
+        }
+
+        .top-note {
+            max-width: 480px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .workbench {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(330px, 0.8fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .control-panel,
+        .report-panel,
+        .side-panel {
+            border-radius: 8px;
+        }
+
+        .control-panel {
+            padding: 20px;
+            margin-bottom: 22px;
+            background:
+                linear-gradient(145deg, rgba(255, 47, 125, 0.12), transparent 38%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
+                var(--panel);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.4fr) 170px minmax(210px, 0.9fr);
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.82rem;
+            font-weight: 800;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            height: 48px;
+            border: 1px solid rgba(255, 247, 251, 0.16);
+            border-radius: 14px;
+            background: rgba(9, 4, 15, 0.68);
+            color: var(--ink);
+            padding: 0 13px;
+            outline: none;
+        }
+
+        .select-shell {
+            position: relative;
+        }
+
+        .select-shell select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 44px;
+            background:
+                radial-gradient(circle at 14% 0%, rgba(255, 47, 125, 0.2), transparent 32%),
+                linear-gradient(145deg, rgba(156, 92, 255, 0.18), rgba(0, 224, 199, 0.055)),
+                rgba(9, 4, 15, 0.9);
+            border-color: rgba(255, 47, 125, 0.34);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 247, 251, 0.16),
+                0 0 0 1px rgba(0, 224, 199, 0.055),
+                0 14px 36px rgba(0, 0, 0, 0.34);
+            font-weight: 750;
+        }
+
+        .select-shell::after {
+            content: "";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            width: 9px;
+            height: 9px;
+            border-right: 2px solid var(--teal);
+            border-bottom: 2px solid var(--teal);
+            filter: drop-shadow(0 0 8px rgba(0, 224, 199, 0.7));
+            transform: translateY(-65%) rotate(45deg);
+            pointer-events: none;
+        }
+
+        .select-shell.disabled {
+            opacity: 0.62;
+        }
+
+        select option {
+            color: #fff7fb;
+            background: #16081c;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--teal);
+            box-shadow:
+                0 0 0 3px rgba(0, 224, 199, 0.14),
+                0 0 28px rgba(255, 47, 125, 0.16);
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .mode-card {
+            min-height: 96px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background:
+                linear-gradient(145deg, rgba(255, 247, 251, 0.09), rgba(255, 255, 255, 0.025)),
+                radial-gradient(circle at 10% 0%, rgba(255, 47, 125, 0.18), transparent 32%);
+            color: var(--ink);
+            cursor: pointer;
+            padding: 12px;
+            text-align: left;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(0, 224, 199, 0.62);
+        }
+
+        .mode-card.active {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(255, 47, 125, 0.38), transparent 42%),
+                linear-gradient(145deg, rgba(0, 224, 199, 0.16), rgba(156, 92, 255, 0.16)),
+                linear-gradient(180deg, rgba(255, 247, 251, 0.12), rgba(255, 255, 255, 0.04));
+            border-color: var(--hot);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 47, 125, 0.5),
+                0 0 36px rgba(255, 47, 125, 0.2),
+                0 18px 42px rgba(0, 0, 0, 0.34);
+        }
+
+        .mode-name {
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 850;
+            margin-bottom: 6px;
+        }
+
+        .mode-copy {
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+
+        .run-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 14px;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .verify-toggle {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 650;
+        }
+
+        .verify-toggle input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .primary-button {
+            min-width: 190px;
+            height: 52px;
+            border-radius: 14px;
+            background:
+                linear-gradient(90deg, var(--hot), var(--violet) 55%, var(--teal));
+            color: white;
+            cursor: pointer;
+            font-weight: 850;
+            transition: transform 0.18s ease, background 0.18s ease;
+            box-shadow:
+                0 0 28px rgba(255, 47, 125, 0.28),
+                0 16px 42px rgba(0, 0, 0, 0.34);
+        }
+
+        .primary-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background:
+                linear-gradient(90deg, #ff5c9b, #a06bff 55%, #1df4dc);
+        }
+
+        .primary-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .message {
+            margin-top: 12px;
+            color: var(--red);
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 700;
+        }
+
+        .report-panel {
+            min-height: 680px;
+            overflow: hidden;
+        }
+
+        .report-head {
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--line);
+            background:
+                radial-gradient(circle at 4% 0%, rgba(255, 47, 125, 0.22), transparent 28%),
+                linear-gradient(135deg, rgba(156, 92, 255, 0.16), rgba(0, 224, 199, 0.07)),
+                repeating-linear-gradient(120deg, rgba(255, 247, 251, 0.045) 0 1px, transparent 1px 18px);
+        }
+
+        .report-title-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .report-title {
+            margin: 0;
+            font-size: clamp(1.8rem, 3vw, 3.1rem);
+            line-height: 1;
+        }
+
+        .status-pill {
+            flex: 0 0 auto;
+            border-radius: 999px;
+            border: 1px solid rgba(8, 127, 140, 0.35);
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--amber);
+            padding: 7px 12px;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .progress-shell {
+            margin-top: 18px;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.09);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--hot), var(--violet), var(--teal));
+            box-shadow: 0 0 24px rgba(255, 47, 125, 0.24);
+            transition: width 0.55s ease;
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 24px 0;
+        }
+
+        .tab {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--ink);
+            cursor: pointer;
+            padding: 8px 14px;
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 800;
+        }
+
+        .tab.active {
+            background: linear-gradient(90deg, var(--hot), var(--violet));
+            border-color: rgba(255, 47, 125, 0.7);
+            color: white;
+        }
+
+        .report-body {
+            padding: 24px;
+            max-height: 760px;
+            overflow: auto;
+        }
+
+        .empty-state {
+            display: grid;
+            min-height: 420px;
+            place-items: center;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            text-align: center;
+        }
+
+        .empty-state strong {
+            display: block;
+            color: var(--ink);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.7rem;
+            margin-bottom: 8px;
+        }
+
+        .markdown {
+            font-size: 1.03rem;
+            line-height: 1.75;
+        }
+
+        .markdown h1,
+        .markdown h2,
+        .markdown h3 {
+            line-height: 1.1;
+        }
+
+        .markdown h1 {
+            font-size: 2.1rem;
+        }
+
+        .markdown h2 {
+            margin-top: 34px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .markdown a {
+            color: var(--teal-dark);
+        }
+
+        .evidence-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .evidence-card {
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--teal);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 13px;
+        }
+
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .visual-card {
+            position: relative;
+            min-height: 310px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background:
+                radial-gradient(circle at 30% 16%, rgba(255, 255, 255, 0.12), transparent 20%),
+                linear-gradient(155deg, rgba(255, 47, 125, 0.16), rgba(0, 224, 199, 0.09));
+            padding: 14px;
+        }
+
+        .visual-card::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(255, 247, 251, 0.12);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .anime-stage {
+            position: relative;
+            height: 150px;
+            margin-bottom: 12px;
+        }
+
+        .anime-head {
+            position: absolute;
+            left: 50%;
+            top: 18px;
+            width: 74px;
+            height: 74px;
+            transform: translateX(-50%);
+            border: 3px solid rgba(255, 247, 251, 0.76);
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255, 47, 125, 0.82), rgba(0, 224, 199, 0.46));
+            box-shadow: 0 0 28px rgba(255, 47, 125, 0.2);
+        }
+
+        .anime-head::before,
+        .anime-head::after {
+            content: "";
+            position: absolute;
+            top: 30px;
+            width: 10px;
+            height: 14px;
+            border-radius: 50%;
+            background: #101827;
+        }
+
+        .anime-head::before {
+            left: 19px;
+        }
+
+        .anime-head::after {
+            right: 19px;
+        }
+
+        .anime-body {
+            position: absolute;
+            left: 50%;
+            top: 88px;
+            width: 132px;
+            height: 62px;
+            transform: translateX(-50%);
+            border: 3px solid rgba(15, 118, 110, 0.66);
+            border-radius: 60% 40% 48% 52%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .anime-orbit,
+        .anime-orbit::before,
+        .anime-orbit::after {
+            position: absolute;
+            border: 2px solid rgba(255, 247, 251, 0.22);
+            border-radius: 50%;
+        }
+
+        .anime-orbit {
+            left: 50%;
+            top: 38px;
+            width: 180px;
+            height: 82px;
+            transform: translateX(-50%) rotate(-13deg);
+        }
+
+        .anime-orbit::before,
+        .anime-orbit::after {
+            content: "";
+            width: 14px;
+            height: 14px;
+            background: var(--teal);
+        }
+
+        .anime-orbit::before {
+            left: 20px;
+            top: 16px;
+        }
+
+        .anime-orbit::after {
+            right: 22px;
+            bottom: 14px;
+            background: var(--amber);
+        }
+
+        .visual-kicker {
+            color: var(--teal);
+            font-size: 0.76rem;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .visual-title {
+            margin: 6px 0 8px;
+            font-size: 1.16rem;
+            font-weight: 900;
+        }
+
+        .visual-copy {
+            color: var(--muted);
+            line-height: 1.45;
+            font-size: 0.94rem;
+        }
+
+        .evidence-card strong {
+            display: block;
+            line-height: 1.45;
+        }
+
+        .source {
+            margin-top: 8px;
+            color: var(--blue);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.84rem;
+            overflow-wrap: anywhere;
+        }
+
+        .confidence {
+            margin-top: 6px;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .side-panel {
+            position: sticky;
+            top: 18px;
+            padding: 20px;
+        }
+
+        .side-title {
+            margin: 0 0 14px;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.92rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .phase-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .phase-item {
+            display: grid;
+            grid-template-columns: 36px 1fr;
+            gap: 11px;
+            align-items: start;
+        }
+
+        .phase-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 900;
+        }
+
+        .phase-item.active .phase-dot {
+            background: var(--amber);
+            color: #1d1605;
+        }
+
+        .phase-item.done .phase-dot {
+            background: var(--green);
+            color: white;
+        }
+
+        .phase-name {
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 850;
+        }
+
+        .phase-copy {
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--teal-dark);
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .possibilities {
+            border-top: 1px solid var(--line);
+            padding-top: 16px;
+        }
+
+        .history-panel {
+            border-top: 1px solid var(--line);
+            margin-top: 18px;
+            padding-top: 16px;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 9px;
+        }
+
+        .history-button {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--ink);
+            cursor: pointer;
+            padding: 10px;
+            text-align: left;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .history-button:hover {
+            border-color: var(--hot);
+            transform: translateY(-1px);
+        }
+
+        .history-topic {
+            display: block;
+            font-weight: 850;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-meta {
+            display: block;
+            color: var(--muted);
+            font-size: 0.78rem;
+            margin-top: 3px;
+            text-transform: uppercase;
+        }
+
+        .clear-history {
+            margin-top: 10px;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-weight: 800;
+            padding: 0;
+        }
+
+        .possibility {
+            margin-bottom: 12px;
+            color: var(--muted);
+            font-family: "Segoe UI", sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .possibility strong {
+            color: var(--ink);
+        }
+
+        .error-box {
+            border: 1px solid rgba(179, 58, 58, 0.35);
+            border-radius: 6px;
+            background: rgba(179, 58, 58, 0.08);
+            color: var(--red);
+            padding: 14px;
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1050px) {
+            .workbench,
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .app {
+                width: min(100vw - 20px, 1500px);
+                padding-top: 10px;
+            }
+
+            .topbar,
+            .report-title-row,
+            .run-row {
+                display: block;
+            }
+
+            .mode-grid,
+            .stat-grid,
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .primary-button {
+                width: 100%;
+                margin-top: 14px;
+            }
+
+            .status-pill {
+                display: inline-block;
+                margin-top: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        const h = React.createElement;
+        const API_BASE = window.location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+
+        const MODES = [
+            {
+                id: "fast",
+                name: "Fast Brief",
+                copy: "A quick source-backed overview when you want the gist first.",
+                expected: "Fastest",
+            },
+            {
+                id: "balanced",
+                name: "Balanced Study",
+                copy: "A clearer report with scraped sources and AI synthesis.",
+                expected: "Recommended",
+            },
+            {
+                id: "deep",
+                name: "Deep Review",
+                copy: "More checking when accuracy matters more than speed.",
+                expected: "Most rigorous",
+            },
+        ];
+
+        const PHASES = [
+            { id: "phase_1", name: "Research", copy: "Planning, searching, collecting evidence" },
+            { id: "phase_2", name: "Verification", copy: "Testing selected claims" },
+            { id: "phase_3", name: "Synthesis", copy: "Preparing the final read" },
+            { id: "phase_4", name: "Complete", copy: "Ready to read" },
+        ];
+
+        const HISTORY_KEY = "researchDeskPastSearches";
+
+        function App() {
+            const [topic, setTopic] = React.useState("");
+            const [depth, setDepth] = React.useState(1);
+            const [mode, setMode] = React.useState("fast");
+            const [verify, setVerify] = React.useState(false);
+            const [model, setModel] = React.useState("deepseek/deepseek-v4-flash");
+            const [sessionId, setSessionId] = React.useState(null);
+            const [session, setSession] = React.useState(null);
+            const [report, setReport] = React.useState("");
+            const [view, setView] = React.useState("report");
+            const [message, setMessage] = React.useState("");
+            const [loading, setLoading] = React.useState(false);
+            const [history, setHistory] = React.useState(loadHistory);
+
+            React.useEffect(() => {
+                if (mode === "fast") {
+                    setDepth(1);
+                    setVerify(false);
+                    setModel("deepseek/deepseek-v4-flash");
+                } else if (mode === "balanced") {
+                    setDepth(previous => Math.max(previous, 2));
+                    setModel("deepseek/deepseek-v4-flash");
+                } else {
+                    setDepth(previous => Math.max(previous, 3));
+                    setVerify(true);
+                    setModel("deepseek/deepseek-v4-pro");
+                }
+            }, [mode]);
+
+            React.useEffect(() => {
+                if (!sessionId) return;
+
+                let cancelled = false;
+                const poll = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/research/${sessionId}`);
+                        if (!response.ok) throw new Error("Could not load session status");
+                        const data = await response.json();
+                        if (cancelled) return;
+                        setSession(data);
+
+                        if (data.status === "completed") {
+                            await loadReport(sessionId, setReport, setMessage);
+                            return;
+                        }
+
+                        if (data.status === "failed") {
+                            setReport("");
+                            return;
+                        }
+
+                        window.setTimeout(poll, 1400);
+                    } catch (error) {
+                        if (!cancelled) setMessage(error.message);
+                    }
+                };
+
+                poll();
+                return () => {
+                    cancelled = true;
+                };
+            }, [sessionId]);
+
+            const startResearch = async () => {
+                const cleanTopic = topic.trim();
+                if (!cleanTopic) {
+                    setMessage("Enter a research topic first.");
+                    return;
+                }
+
+                setLoading(true);
+                setMessage("");
+                setReport("");
+                setSession(null);
+                setView("report");
+                const nextHistory = rememberSearch(history, {
+                    topic: cleanTopic,
+                    mode,
+                    depth,
+                    model,
+                    verify,
+                    createdAt: new Date().toISOString()
+                });
+                setHistory(nextHistory);
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/research/start`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ topic: cleanTopic, depth, verify, model, mode }),
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        throw new Error(text || "Could not start research");
+                    }
+
+                    const data = await response.json();
+                    setSessionId(data.session_id);
+                } catch (error) {
+                    setMessage(error.message || "Failed to start research");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const progress = getProgress(session, depth);
+            const evidence = session && session.evidence_bank ? session.evidence_bank : [];
+            const errors = session && session.errors ? session.errors : [];
+            const activeMode = MODES.find(item => item.id === mode) || MODES[0];
+            const replaySearch = item => {
+                setTopic(item.topic);
+                setMode(item.mode || "fast");
+                setDepth(item.depth || 1);
+                setModel(item.model || "deepseek/deepseek-v4-flash");
+                setVerify(Boolean(item.verify));
+            };
+            const clearHistory = () => {
+                localStorage.removeItem(HISTORY_KEY);
+                setHistory([]);
+            };
+
+            return h("main", { className: "app" },
+                h("div", { className: "watermark-layer", "aria-hidden": "true" },
+                    h("div", { className: "watermark-pose pose-lotus" }, h("span", null, "Lotus")),
+                    h("div", { className: "watermark-pose pose-arch" }, h("span", null, "Arch")),
+                    h("div", { className: "watermark-pose pose-embrace" }, h("span", null, "Embrace"))
+                ),
+                h("section", { className: "topbar" },
+                    h("div", null,
+                        h("div", { className: "brand-kicker" }, "Autonomous Research Desk"),
+                        h("h1", null, "Make the internet confess")
+                    ),
+                    h("p", { className: "top-note" },
+                        "Unlike a regular chatbot reply, this workspace searches the web, keeps source evidence, shows progress, and turns findings into a traceable report you can inspect."
+                    )
+                ),
+                h("section", { className: "control-panel panel" },
+                    h("div", { className: "control-grid" },
+                        field("What are you looking for?",
+                            h("input", {
+                                type: "text",
+                                value: topic,
+                                onChange: event => setTopic(event.target.value),
+                                onKeyDown: event => {
+                                    if (event.key === "Enter") startResearch();
+                                },
+                                placeholder: "physics, black holes, climate policy..."
+                            })
+                        ),
+                        field("Intensity",
+                            h("div", { className: `select-shell ${mode === "fast" ? "disabled" : ""}` },
+                                h("select", {
+                                    value: depth,
+                                    onChange: event => setDepth(Number(event.target.value)),
+                                    disabled: mode === "fast"
+                                },
+                                    h("option", { value: 1 }, "Quick (1)"),
+                                    h("option", { value: 2 }, "Lean (2)"),
+                                    h("option", { value: 3 }, "Standard (3)"),
+                                    h("option", { value: 5 }, "Thorough (5)")
+                                )
+                            )
+                        ),
+                        field("Model",
+                            h("div", { className: "select-shell" },
+                                h("select", {
+                                    value: model,
+                                    onChange: event => setModel(event.target.value)
+                                },
+                                    h("option", { value: "deepseek/deepseek-v4-flash" }, "DeepSeek V4 Flash"),
+                                    h("option", { value: "deepseek/deepseek-v4-pro" }, "DeepSeek V4 Pro")
+                                )
+                            )
+                        )
+                    ),
+                    h("div", { className: "mode-grid" },
+                        MODES.map(item => h("button", {
+                            key: item.id,
+                            type: "button",
+                            className: `mode-card ${mode === item.id ? "active" : ""}`,
+                            onClick: () => setMode(item.id)
+                        },
+                            h("div", { className: "mode-name" }, item.name),
+                            h("div", { className: "mode-copy" }, item.copy)
+                        ))
+                    ),
+                    h("div", { className: "run-row" },
+                        h("label", { className: "verify-toggle" },
+                            h("input", {
+                                type: "checkbox",
+                                checked: verify,
+                                disabled: mode === "fast",
+                                onChange: event => setVerify(event.target.checked)
+                            }),
+                            "Cross-check selected claims"
+                        ),
+                        h("button", {
+                            className: "primary-button",
+                            type: "button",
+                            disabled: loading,
+                            onClick: startResearch
+                        }, loading ? "Starting..." : "Start Research")
+                    ),
+                    message ? h("div", { className: "message" }, message) : null
+                ),
+                h("section", { className: "workbench" },
+                    h("article", { className: "report-panel panel" },
+                        h("div", { className: "report-head" },
+                            h("div", { className: "report-title-row" },
+                                h("div", null,
+                                    h("h2", { className: "report-title" }, session ? session.topic : "No active research"),
+                                    h("div", { className: "phase-copy" }, `${activeMode.name} - ${activeMode.expected}`)
+                                ),
+                                h("div", { className: "status-pill" }, statusLabel(session))
+                            ),
+                            h("div", { className: "progress-shell" },
+                                h("div", { className: "progress-meta" },
+                                    h("span", null, progress.label),
+                                    h("strong", null, `${progress.value}%`)
+                                ),
+                                h("div", { className: "progress-track" },
+                                    h("div", { className: "progress-fill", style: { width: `${progress.value}%` } })
+                                )
+                            )
+                        ),
+                        h("div", { className: "view-tabs" },
+                            tabButton("report", "The Read", view, setView),
+                            tabButton("visuals", "Anime Guide", view, setView),
+                            tabButton("evidence", `Receipts (${evidence.length})`, view, setView)
+                        ),
+                        h("div", { className: "report-body" },
+                            renderMainContent({ session, report, view, evidence, errors })
+                        )
+                    ),
+                    h("aside", { className: "side-panel panel" },
+                        h("h3", { className: "side-title" }, "Pulse"),
+                        h("div", { className: "phase-list" },
+                            PHASES.map((phase, index) => h(PhaseItem, {
+                                key: phase.id,
+                                phase,
+                                index,
+                                session
+                            }))
+                        ),
+                        h("div", { className: "stat-grid" },
+                            h("div", { className: "stat" },
+                                h("div", { className: "stat-value" }, evidence.length),
+                                h("div", { className: "stat-label" }, "Receipts")
+                            ),
+                            h("div", { className: "stat" },
+                                h("div", { className: "stat-value" }, depth),
+                                h("div", { className: "stat-label" }, "Intensity")
+                            )
+                        ),
+                        h("div", { className: "possibilities" },
+                            h("h3", { className: "side-title" }, "Why Choose This?"),
+                            h("p", { className: "possibility" },
+                                h("strong", null, "Beyond chat: "),
+                                "it keeps sources and evidence instead of giving one opaque answer."
+                            ),
+                            h("p", { className: "possibility" },
+                                h("strong", null, "Research modes: "),
+                                "choose speed, balance, or deeper verification depending on the task."
+                            ),
+                            h("p", { className: "possibility" },
+                                h("strong", null, "Traceable output: "),
+                                "reports, evidence, and past searches remain available for review."
+                            )
+                        ),
+                        h("div", { className: "history-panel" },
+                            h("h3", { className: "side-title" }, "Past Searches"),
+                            history.length
+                                ? h("div", { className: "history-list" },
+                                    history.map(item => h("button", {
+                                        key: `${item.topic}-${item.createdAt}`,
+                                        type: "button",
+                                        className: "history-button",
+                                        onClick: () => replaySearch(item)
+                                    },
+                                        h("span", { className: "history-topic" }, item.topic),
+                                        h("span", { className: "history-meta" }, `${modeName(item.mode)} - ${new Date(item.createdAt).toLocaleDateString()}`)
+                                    )),
+                                    h("button", { type: "button", className: "clear-history", onClick: clearHistory }, "Clear past searches")
+                                )
+                                : h("p", { className: "possibility" }, "Your last searches will land here.")
+                        )
+                    )
+                )
+            );
+        }
+
+        function field(label, control) {
+            return h("div", null, h("label", null, label), control);
+        }
+
+        function loadHistory() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+                return Array.isArray(parsed) ? parsed.slice(0, 8) : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function rememberSearch(history, entry) {
+            const deduped = history.filter(item => item.topic.toLowerCase() !== entry.topic.toLowerCase());
+            const next = [entry, ...deduped].slice(0, 8);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+            return next;
+        }
+
+        function modeName(mode) {
+            const found = MODES.find(item => item.id === mode);
+            return found ? found.name : "Fast Brief";
+        }
+
+        function tabButton(id, label, view, setView) {
+            return h("button", {
+                className: `tab ${view === id ? "active" : ""}`,
+                type: "button",
+                onClick: () => setView(id)
+            }, label);
+        }
+
+        function PhaseItem({ phase, index, session }) {
+            const state = phaseState(phase.id, session);
+            return h("div", { className: `phase-item ${state}` },
+                h("div", { className: "phase-dot" }, state === "done" ? "OK" : index + 1),
+                h("div", null,
+                    h("div", { className: "phase-name" }, phase.name),
+                    h("div", { className: "phase-copy" }, phase.copy)
+                )
+            );
+        }
+
+        function phaseState(phaseId, session) {
+            if (!session) return "";
+            if (session.status === "completed") return "done";
+            const currentIndex = PHASES.findIndex(item => item.id === session.phase);
+            const phaseIndex = PHASES.findIndex(item => item.id === phaseId);
+            if (phaseIndex < currentIndex) return "done";
+            if (phaseIndex === currentIndex) return "active";
+            return "";
+        }
+
+        function getProgress(session, depth) {
+            if (!session) return { value: 0, label: "Waiting to start" };
+            if (session.status === "completed") return { value: 100, label: "Research complete" };
+            if (session.status === "failed") return { value: 100, label: "Research stopped" };
+
+            const phase1 = session.progress && session.progress.phase_1 ? session.progress.phase_1 : {};
+            const phase2 = session.progress && session.progress.phase_2 ? session.progress.phase_2 : {};
+            const evidenceCount = session.evidence_count || 0;
+            const iterations = phase1.iterations || 0;
+            const researchPart = Math.min(45, Math.round((iterations / Math.max(depth, 1)) * 45));
+
+            if (session.phase === "phase_1") {
+                const bonus = evidenceCount > 0 ? 10 : 0;
+                return { value: Math.min(55, 8 + researchPart + bonus), label: "Collecting evidence" };
+            }
+            if (session.phase === "phase_2") {
+                const verified = phase2.claims_verified || 0;
+                const verifyPart = Math.min(25, Math.round((verified / Math.max(evidenceCount, 1)) * 25));
+                return { value: Math.min(80, 55 + verifyPart), label: "Verifying claims" };
+            }
+            if (session.phase === "phase_3") return { value: 88, label: "Writing report" };
+            if (session.phase === "phase_4") return { value: 96, label: "Finalizing" };
+            return { value: 5, label: "Starting" };
+        }
+
+        function statusLabel(session) {
+            if (!session) return "Ready";
+            const labels = {
+                planning: "Planning",
+                executing: "Researching",
+                verifying: "Verifying",
+                generating: "Writing",
+                completed: "Complete",
+                failed: "Failed",
+            };
+            return labels[session.status] || session.status;
+        }
+
+        function renderMainContent({ session, report, view, evidence, errors }) {
+            if (session && session.status === "failed") {
+                return h("div", { className: "error-box" },
+                    errors.length ? errors.join(" ") : "The research run failed before a report was generated."
+                );
+            }
+
+            if (view === "visuals") {
+                return renderVisualGuide(session, evidence);
+            }
+
+            if (view === "evidence") {
+                if (!evidence.length) {
+                    return h("div", { className: "empty-state" },
+                        h("div", null,
+                            h("strong", null, "Evidence will appear here"),
+                            h("span", null, "Search results and extracted claims stream in as the backend works.")
+                        )
+                    );
+                }
+                return h("div", { className: "evidence-list" },
+                    evidence.map(item => h("div", { className: "evidence-card", key: item.claim_id || `${item.source_url}-${item.claim}` },
+                        h("strong", null, item.claim),
+                        h("div", { className: "source" }, item.source_url),
+                        h("div", { className: "confidence" }, `Confidence: ${item.confidence || "unknown"}`)
+                    ))
+                );
+            }
+
+            if (report) {
+                const html = window.marked && marked.parse
+                    ? marked.parse(report)
+                    : `<pre>${escapeHtml(report)}</pre>`;
+                return h("div", {
+                    className: "markdown",
+                    dangerouslySetInnerHTML: { __html: html }
+                });
+            }
+
+            if (session && session.status !== "completed") {
+                return h("div", { className: "empty-state" },
+                    h("div", null,
+                        h("strong", null, "Building your report"),
+                        h("span", null, evidence.length ? `${evidence.length} evidence items collected so far.` : "Search is warming up.")
+                    )
+                );
+            }
+
+            return h("div", { className: "empty-state" },
+                h("div", null,
+                    h("strong", null, "Start with a question"),
+                    h("span", null, "Try physics, black holes, renewable energy, or anything you want to understand.")
+                )
+            );
+        }
+
+        function renderVisualGuide(session, evidence) {
+            const topic = session && session.topic ? session.topic : "your topic";
+            const captions = buildVisualCaptions(topic, evidence);
+            return h("div", { className: "visual-grid" },
+                captions.map((card, index) => h("div", { className: "visual-card", key: card.title },
+                    h("div", { className: "anime-stage" },
+                        h("div", { className: "anime-orbit" }),
+                        h("div", { className: "anime-head" }),
+                        h("div", { className: "anime-body" })
+                    ),
+                    h("div", { className: "visual-kicker" }, `Panel ${index + 1}`),
+                    h("div", { className: "visual-title" }, card.title),
+                    h("div", { className: "visual-copy" }, card.copy)
+                ))
+            );
+        }
+
+        function buildVisualCaptions(topic, evidence) {
+            const cleanClaims = evidence
+                .map(item => item.claim || "")
+                .filter(Boolean)
+                .slice(0, 3);
+
+            return [
+                {
+                    title: "Big Picture",
+                    copy: cleanClaims[0]
+                        ? shorten(cleanClaims[0], 150)
+                        : `${topic} is the main character. The app is collecting clues to explain it simply.`
+                },
+                {
+                    title: "Key Moving Part",
+                    copy: cleanClaims[1]
+                        ? shorten(cleanClaims[1], 150)
+                        : "Watch for the forces, people, events, or ideas that make the topic move."
+                },
+                {
+                    title: "Why It Matters",
+                    copy: cleanClaims[2]
+                        ? shorten(cleanClaims[2], 150)
+                        : "The final report turns evidence into a short, readable story with sources."
+                }
+            ];
+        }
+
+        function shorten(text, max) {
+            if (text.length <= max) return text;
+            return `${text.slice(0, max).replace(/\s+\S*$/, "")}...`;
+        }
+
+        async function loadReport(sessionId, setReport, setMessage) {
+            try {
+                const response = await fetch(`${API_BASE}/api/research/${sessionId}/report-text`);
+                if (!response.ok) throw new Error("Report was generated, but could not be loaded.");
+                const data = await response.json();
+                setReport((data.content || "").trim());
+            } catch (error) {
+                setMessage(error.message);
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+    </script>
+</body>
+</html>
