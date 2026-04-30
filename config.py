@@ -4,6 +4,7 @@ Configuration management for Autonomous Research Agent.
 
 import os
 import json
+import tempfile
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -18,6 +19,8 @@ if settings_path.exists():
 
 # Load environment variables from .env
 load_dotenv()
+
+IS_VERCEL = os.getenv("VERCEL") == "1"
 
 # Kimi API (support both KIMI_ and ANTHROPIC_ prefixes)
 KIMI_API_KEY = (
@@ -43,9 +46,14 @@ MAX_ITERATIONS = int(os.getenv("MAX_ITERATIONS", "15"))
 TOKEN_BUDGET = int(os.getenv("TOKEN_BUDGET", "200000"))
 
 # Paths
-DATABASE_PATH = os.getenv("DATABASE_PATH", "logs/research.db")
-LOG_PATH = os.getenv("LOG_PATH", "logs/research.jsonl")
-REPORT_PATH = os.getenv("REPORT_PATH", "reports/")
+TEMP_DIR = Path(tempfile.gettempdir())
+DEFAULT_DATABASE_PATH = str(TEMP_DIR / "research.db") if IS_VERCEL else "logs/research.db"
+DEFAULT_LOG_PATH = str(TEMP_DIR / "research.jsonl") if IS_VERCEL else "logs/research.jsonl"
+DEFAULT_REPORT_PATH = str(TEMP_DIR / "reports") if IS_VERCEL else "reports/"
+
+DATABASE_PATH = os.getenv("DATABASE_PATH", DEFAULT_DATABASE_PATH)
+LOG_PATH = os.getenv("LOG_PATH", DEFAULT_LOG_PATH)
+REPORT_PATH = os.getenv("REPORT_PATH", DEFAULT_REPORT_PATH)
 
 # Create directories
 Path(DATABASE_PATH).parent.mkdir(parents=True, exist_ok=True)

@@ -151,6 +151,21 @@ Interactive API docs:
 http://127.0.0.1:8000/docs
 ```
 
+## Deploy On Vercel
+
+This project includes `app.py` as the Vercel FastAPI entrypoint. It imports the real FastAPI app from `backend.py`.
+
+In the Vercel project dashboard, add these Environment Variables:
+
+```env
+KIMI_API_URL=https://openrouter.ai/api/v1
+KIMI_API_KEY=your_openrouter_api_key_here
+KIMI_MODEL=deepseek/deepseek-v4-pro
+FIRECRAWL_API_KEY=your_firecrawl_api_key_here
+```
+
+`FIRECRAWL_API_KEY` is optional. On Vercel, generated runtime files are stored in `/tmp`, because the deployed code folder should be treated as read-only.
+
 ## Research Modes
 
 - Fast Brief: quickest run, source-backed overview, skips slower deep work.
