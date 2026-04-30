@@ -613,6 +613,108 @@
             margin-bottom: 8px;
         }
 
+        .cook-card {
+            width: min(720px, 100%);
+            border: 1px solid rgba(255, 247, 251, 0.14);
+            border-radius: 26px;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(255, 47, 125, 0.2), transparent 34%),
+                radial-gradient(circle at 96% 8%, rgba(0, 224, 199, 0.14), transparent 30%),
+                rgba(255, 255, 255, 0.045);
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.28);
+            padding: 28px;
+            text-align: left;
+        }
+
+        .cook-kicker {
+            color: var(--teal);
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .cook-title {
+            margin: 9px 0 10px;
+            color: var(--ink);
+            font-family: var(--font-display);
+            font-size: clamp(1.65rem, 3vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 1.03;
+        }
+
+        .cook-copy {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.55;
+        }
+
+        .fact-strip {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 12px;
+            align-items: start;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 224, 199, 0.15);
+            border-radius: 18px;
+            background: rgba(0, 224, 199, 0.055);
+            padding: 14px;
+        }
+
+        .fact-badge {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(0, 224, 199, 0.12);
+            color: var(--teal);
+            font-weight: 900;
+        }
+
+        .fact-text {
+            color: var(--ink);
+            line-height: 1.45;
+        }
+
+        .draft-banner {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 47, 125, 0.24);
+            border-radius: 18px;
+            background:
+                linear-gradient(135deg, rgba(255, 47, 125, 0.12), rgba(0, 224, 199, 0.06)),
+                rgba(255, 255, 255, 0.04);
+            padding: 14px 16px;
+        }
+
+        .draft-banner strong {
+            display: block;
+            color: var(--ink);
+            margin-bottom: 3px;
+        }
+
+        .draft-banner span {
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .draft-pill {
+            border-radius: 999px;
+            background: rgba(255, 47, 125, 0.16);
+            color: #ff8ad1;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            padding: 8px 11px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
         .markdown {
             font-size: 1.03rem;
             line-height: 1.75;
@@ -1023,6 +1125,10 @@
                 display: inline-block;
                 margin-top: 12px;
             }
+
+            .draft-banner {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1058,6 +1164,25 @@
             { id: "phase_2", name: "Verification", copy: "Testing selected claims" },
             { id: "phase_3", name: "Synthesis", copy: "Preparing the final read" },
             { id: "phase_4", name: "Complete", copy: "Ready to read" },
+        ];
+
+        const COOK_LINES = [
+            "Hold tight. I'm cooking the kind of answer that comes with receipts.",
+            "Give me a sec. I'm turning internet chaos into something readable.",
+            "Go sip water, check that text, blink twice. I'm sorting the good stuff.",
+            "Tiny delay, better payoff. I'm hunting sources, not vibes.",
+            "The web is messy. I'm cleaning the table before serving."
+        ];
+
+        const WAIT_FACTS = [
+            "Octopuses have three hearts, and two of them pause when they swim.",
+            "Bananas are berries, but strawberries are not true botanical berries.",
+            "A day on Venus is longer than a year on Venus.",
+            "Sharks are older than trees by hundreds of millions of years.",
+            "The Eiffel Tower can grow taller in hot weather because metal expands.",
+            "Your brain uses roughly 20% of your body’s energy while weighing only about 2% of body mass.",
+            "The first computer bug was literally a moth found inside a machine.",
+            "Black holes do not suck everything in; objects can orbit them like any other massive object."
         ];
 
         const HISTORY_KEY = "researchDeskPastSearches";
@@ -1501,19 +1626,17 @@
                 const html = window.marked && marked.parse
                     ? marked.parse(report)
                     : `<pre>${escapeHtml(report)}</pre>`;
-                return h("div", {
-                    className: "markdown",
-                    dangerouslySetInnerHTML: { __html: html }
-                });
+                return h("div", null,
+                    renderDraftBanner(session),
+                    h("div", {
+                        className: "markdown",
+                        dangerouslySetInnerHTML: { __html: html }
+                    })
+                );
             }
 
             if (session && session.status !== "completed") {
-                return h("div", { className: "empty-state" },
-                    h("div", null,
-                        h("strong", null, "Building your report"),
-                        h("span", null, evidence.length ? `${evidence.length} evidence items collected so far.` : "Search is warming up.")
-                    )
-                );
+                return renderCookingState(session, evidence);
             }
 
             return h("div", { className: "empty-state" },
@@ -1522,6 +1645,75 @@
                     h("span", null, "Try physics, black holes, renewable energy, or anything you want to understand.")
                 )
             );
+        }
+
+        function renderDraftBanner(session) {
+            if (!isInstantDraft(session) || session.status === "completed") return null;
+            const mood = pickForSession(COOK_LINES, session, 1);
+            return h("div", { className: "draft-banner" },
+                h("div", null,
+                    h("strong", null, mood),
+                    h("span", null, pickForSession(WAIT_FACTS, session, 2))
+                ),
+                h("div", { className: "draft-pill" }, "Live draft")
+            );
+        }
+
+        function renderCookingState(session, evidence) {
+            const mode = getSessionMode(session);
+            if (mode === "fast") {
+                return h("div", { className: "empty-state" },
+                    h("div", null,
+                        h("strong", null, "Building your quick brief"),
+                        h("span", null, evidence.length ? `${evidence.length} receipts collected so far.` : "Search is warming up.")
+                    )
+                );
+            }
+
+            return h("div", { className: "empty-state" },
+                h("div", { className: "cook-card" },
+                    h("div", { className: "cook-kicker" }, mode === "deep" ? "Deep review is cooking" : "Balanced study is cooking"),
+                    h("div", { className: "cook-title" }, pickForSession(COOK_LINES, session, 0)),
+                    h("div", { className: "cook-copy" },
+                        evidence.length
+                            ? `${evidence.length} receipts collected so far. I'm checking what deserves to make the final cut.`
+                            : "Search is warming up. I'm pulling sources first, then turning them into a clean read."
+                    ),
+                    h("div", { className: "fact-strip" },
+                        h("div", { className: "fact-badge" }, "?"),
+                        h("div", { className: "fact-text" }, pickForSession(WAIT_FACTS, session, 0))
+                    )
+                )
+            );
+        }
+
+        function isInstantDraft(session) {
+            return Boolean(
+                session &&
+                session.progress &&
+                session.progress.phase_3 &&
+                session.progress.phase_3.instant
+            );
+        }
+
+        function getSessionMode(session) {
+            return session && session.progress && session.progress.settings
+                ? session.progress.settings.mode || "fast"
+                : "fast";
+        }
+
+        function pickForSession(items, session, salt) {
+            const seed = [
+                session && session.session_id ? session.session_id : "ready",
+                session && session.phase ? session.phase : "phase",
+                session && session.evidence_count ? session.evidence_count : 0,
+                salt
+            ].join("-");
+            let total = 0;
+            for (let index = 0; index < seed.length; index += 1) {
+                total += seed.charCodeAt(index);
+            }
+            return items[total % items.length];
         }
 
         function renderVisualGuide(session, evidence) {
