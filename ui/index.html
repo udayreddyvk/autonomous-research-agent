@@ -181,28 +181,53 @@
             grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.52fr);
             gap: 28px;
             align-items: end;
-            padding: 28px 0 30px;
+            padding: 18px 0 30px;
         }
 
         .brand-kicker {
-            color: var(--amber);
+            position: relative;
+            display: inline-block;
+            color: #ff78c8;
             font-family: var(--font-display);
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            text-transform: none;
+        }
+
+        .brand-kicker::after {
+            content: "";
+            display: block;
+            width: 26px;
+            height: 2px;
+            margin-top: 13px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ff5fb8, #ffb0df);
+            box-shadow: 0 0 14px rgba(255, 47, 125, 0.58);
         }
 
         h1 {
-            margin: 10px 0 0;
+            margin: 14px 0 0;
             font-family: var(--font-display);
-            font-size: clamp(2.7rem, 6.7vw, 6.35rem);
-            font-weight: 800;
-            line-height: 0.92;
-            letter-spacing: -0.058em;
+            font-size: clamp(2.1rem, 4.1vw, 4.2rem);
+            font-weight: 600;
+            line-height: 0.98;
+            letter-spacing: -0.055em;
             text-shadow:
-                0 0 34px rgba(255, 47, 125, 0.35),
-                0 22px 56px rgba(0, 0, 0, 0.68);
+                0 0 24px rgba(255, 47, 125, 0.22),
+                0 18px 42px rgba(0, 0, 0, 0.64);
+        }
+
+        .hero-line {
+            display: block;
+        }
+
+        .hero-accent {
+            background: linear-gradient(90deg, #ff6fd1 0%, #ff4fb8 48%, #b56dff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
         }
 
         .hero-pitch {
@@ -973,7 +998,7 @@
             }
 
             h1 {
-                font-size: clamp(2.45rem, 14.5vw, 4.35rem);
+                font-size: clamp(2.15rem, 12vw, 3.65rem);
                 letter-spacing: -0.052em;
             }
 
@@ -1167,11 +1192,13 @@
                 ),
                 h("section", { className: "topbar" },
                     h("div", null,
-                        h("div", { className: "brand-kicker" }, "Autonomous Research Desk"),
+                        h("div", { className: "brand-kicker" }, "Research Desk"),
                         h("h1", null,
-                            "Ask The Web.",
-                            h("br"),
-                            "Get Receipts."
+                            h("span", { className: "hero-line" }, "Ask The Web."),
+                            h("span", { className: "hero-line" },
+                                "Get ",
+                                h("span", { className: "hero-accent" }, "Receipts.")
+                            )
                         )
                     ),
                     h("aside", { className: "hero-pitch", "aria-label": "Why this research workspace is useful" },
