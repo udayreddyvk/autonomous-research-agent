@@ -1185,6 +1185,8 @@
             "Black holes do not suck everything in; objects can orbit them like any other massive object."
         ];
 
+        const LIVE_RESEARCH_NOTE = "Tiny truth: a real final report cannot be instant because I'm searching live webpages, scraping sources, checking claims, and verifying the receipts as I go.";
+
         const HISTORY_KEY = "researchDeskPastSearches";
 
         function App() {
@@ -1653,7 +1655,7 @@
             return h("div", { className: "draft-banner" },
                 h("div", null,
                     h("strong", null, mood),
-                    h("span", null, pickForSession(WAIT_FACTS, session, 2))
+                    h("span", null, `${LIVE_RESEARCH_NOTE} Meanwhile: ${pickForSession(WAIT_FACTS, session, 2)}`)
                 ),
                 h("div", { className: "draft-pill" }, "Live draft")
             );
@@ -1676,8 +1678,8 @@
                     h("div", { className: "cook-title" }, pickForSession(COOK_LINES, session, 0)),
                     h("div", { className: "cook-copy" },
                         evidence.length
-                            ? `${evidence.length} receipts collected so far. I'm checking what deserves to make the final cut.`
-                            : "Search is warming up. I'm pulling sources first, then turning them into a clean read."
+                            ? `${evidence.length} receipts collected so far. ${LIVE_RESEARCH_NOTE}`
+                            : `Search is warming up. ${LIVE_RESEARCH_NOTE}`
                     ),
                     h("div", { className: "fact-strip" },
                         h("div", { className: "fact-badge" }, "?"),
