@@ -182,6 +182,32 @@ class SwarmOrchestrator:
         """Retrieve session by ID."""
         return self.sessions.get(session_id)
 
+    def find_completed_session(
+        self,
+        topic: str,
+        mode: str,
+        model: str
+    ) -> Optional[ResearchSession]:
+        """Return the newest completed matching session for instant repeat reads."""
+        normalized_topic = topic.strip().lower()
+        matches = []
+        for session in self.sessions.values():
+            settings = session.progress.get("settings", {})
+            report_path = session.progress.get("phase_3", {}).get("report_path")
+            if (
+                session.status == "completed"
+                and session.topic.strip().lower() == normalized_topic
+                and settings.get("mode") == mode
+                and session.model == model
+                and report_path
+                and Path(report_path).exists()
+            ):
+                matches.append(session)
+
+        if not matches:
+            return None
+        return sorted(matches, key=lambda item: item.updated_at, reverse=True)[0]
+
     def _load_sessions(self):
         """Load persisted sessions from SQLite on startup."""
         conn = sqlite3.connect(self.db_path)

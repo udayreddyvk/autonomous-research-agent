@@ -347,6 +347,7 @@ class Phase3Agent(BaseAgent):
             progress = session.progress
             progress["phase_3"]["status"] = "completed"
             progress["phase_3"]["report_path"] = report_path
+            progress["phase_3"]["instant"] = False
             orchestrator.update_session(
                 session.session_id,
                 progress=progress

@@ -1075,6 +1075,7 @@
             const [message, setMessage] = React.useState("");
             const [loading, setLoading] = React.useState(false);
             const [history, setHistory] = React.useState(loadHistory);
+            const loadedReportPath = React.useRef("");
 
             React.useEffect(() => {
                 if (mode === "fast") {
@@ -1103,8 +1104,15 @@
                         if (cancelled) return;
                         setSession(data);
 
-                        if (data.status === "completed") {
+                        const reportPath = data.progress && data.progress.phase_3
+                            ? data.progress.phase_3.report_path
+                            : "";
+                        if (reportPath && reportPath !== loadedReportPath.current) {
                             await loadReport(sessionId, setReport, setMessage);
+                            loadedReportPath.current = reportPath;
+                        }
+
+                        if (data.status === "completed") {
                             return;
                         }
 
@@ -1135,6 +1143,7 @@
                 setLoading(true);
                 setMessage("");
                 setReport("");
+                loadedReportPath.current = "";
                 setSession(null);
                 setView("report");
                 const nextHistory = rememberSearch(history, {

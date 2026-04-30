@@ -282,6 +282,44 @@ async def synthesize_report(
     return _build_fallback_report(topic, evidence_bank)
 
 
+def build_instant_report(topic: str, mode: str = "fast") -> str:
+    """Create an immediate readable draft while live research continues."""
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    mode_name = {
+        "fast": "Fast Brief",
+        "balanced": "Balanced Study",
+        "deep": "Deep Review",
+    }.get(mode, "Research")
+
+    return "\n".join([
+        f"# {topic}",
+        "",
+        "## Instant Brief",
+        "",
+        f"This is a quick starter view for **{topic}**. The live research agent has already started collecting source evidence, and this draft will be replaced by the sourced report when the run finishes.",
+        "",
+        "## What You Can Read First",
+        "",
+        f"- **Topic:** {topic}",
+        f"- **Mode:** {mode_name}",
+        "- **Status:** live web search and evidence collection are running in the background.",
+        "- **Best use:** read this as a launch pad, then inspect the final source-backed report.",
+        "",
+        "## What Happens Next",
+        "",
+        "- The agent searches the live web.",
+        "- It collects snippets and source pages as evidence.",
+        "- It verifies selected claims when the mode allows it.",
+        "- It builds a final report with receipts you can inspect.",
+        "",
+        "## Sources",
+        "",
+        "Sources are still being collected. Check the Receipts tab as the run progresses.",
+        "",
+        f"_Instant draft generated {now}._",
+    ])
+
+
 # --- Helpers ---
 
 def _parse_json_list(text: str, depth: int, topic: str) -> List[str]:

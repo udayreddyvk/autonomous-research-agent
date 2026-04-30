@@ -14,6 +14,7 @@ from pathlib import Path
 from swarm_orchestrator import orchestrator
 from phase_agents import run_research_swarm
 from config import Config
+from tools import build_instant_report
 
 
 app = FastAPI(title="Autonomous Research Agent")
@@ -52,6 +53,18 @@ class SessionResponse(BaseModel):
 @app.post("/api/research/start")
 async def start_research(request: ResearchRequest):
     """Start a new research session."""
+    cached_session = orchestrator.find_completed_session(
+        topic=request.topic,
+        mode=request.mode,
+        model=request.model
+    )
+    if cached_session:
+        return {
+            "session_id": cached_session.session_id,
+            "message": f"Loaded cached research session on '{request.topic}'",
+            "cache_hit": True
+        }
+
     session_id = orchestrator.create_session(
         topic=request.topic,
         depth=request.depth,
@@ -59,13 +72,15 @@ async def start_research(request: ResearchRequest):
         model=request.model,
         mode=request.mode
     )
+    _write_instant_report(session_id, request.topic, request.mode)
 
     # Run swarm in background
     asyncio.create_task(run_research_swarm(session_id))
 
     return {
         "session_id": session_id,
-        "message": f"Started research session on '{request.topic}'"
+        "message": f"Started research session on '{request.topic}'",
+        "cache_hit": False
     }
 
 
@@ -168,6 +183,28 @@ async def root():
 ui_path = Path("ui")
 if ui_path.exists():
     app.mount("/static", StaticFiles(directory="ui"), name="static")
+
+
+def _write_instant_report(session_id: str, topic: str, mode: str):
+    """Attach a readable draft immediately so the UI never starts blank."""
+    session = orchestrator.get_session(session_id)
+    if not session:
+        return
+
+    report_dir = Path(Config.report_path)
+    report_dir.mkdir(parents=True, exist_ok=True)
+    topic_slug = "".join(
+        c if c.isalnum() or c in "-_" else "_"
+        for c in topic.lower().replace(" ", "_")
+    )[:30] or "research"
+    report_path = report_dir / f"{topic_slug}_{session.created_at.replace(':', '-').split('.')[0]}_instant.md"
+    report_path.write_text(build_instant_report(topic, mode), encoding="utf-8")
+
+    progress = session.progress
+    progress["phase_3"]["status"] = "draft"
+    progress["phase_3"]["report_path"] = str(report_path)
+    progress["phase_3"]["instant"] = True
+    orchestrator.update_session(session_id, progress=progress)
 
 
 if __name__ == "__main__":
