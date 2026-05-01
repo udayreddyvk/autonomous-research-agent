@@ -17,7 +17,7 @@ from config import Config
 from tools import build_instant_report
 
 
-app = FastAPI(title="Autonomous Research Agent")
+app = FastAPI(title="Autonomous Research Agent \u2014 Sci-Fi Edition")
 
 # Enable CORS
 app.add_middleware(

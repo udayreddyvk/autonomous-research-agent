@@ -13,9 +13,9 @@ import platform
 def main():
     print("""
     ========================================================
-    Autonomous Research Agent - MVP
+    Autonomous Research Agent \u2014 Sci-Fi Edition
 
-    Starting agent swarm & web dashboard...
+    Initializing probe arrays & holographic interface...
     ========================================================
     """)
 
@@ -25,12 +25,12 @@ def main():
         sys.exit(1)
 
     # Check dependencies
-    print("\n[*] Checking dependencies...")
+    print("\n[*] Verifying neural core integrity...")
     try:
         import fastapi
         import uvicorn
         import pydantic
-        print("[+] FastAPI and dependencies installed")
+        print("[+] Core systems online")
     except ImportError as e:
         print(f"[ERROR] Missing dependency: {e}")
         print("\nInstall with:")
@@ -38,14 +38,14 @@ def main():
         sys.exit(1)
 
     # Create required directories
-    print("\n[*] Creating directories...")
+    print("\n[*] Establishing data vaults...")
     Path("logs").mkdir(exist_ok=True)
     Path("reports").mkdir(exist_ok=True)
     Path("ui").mkdir(exist_ok=True)
-    print("[+] Directories ready")
+    print("[+] Vaults secured")
 
     # Check .env
-    print("\n[*] Checking configuration...")
+    print("\n[*] Scanning configuration matrices...")
     if not Path(".env").exists():
         print("[!] .env file not found")
         print("\nCreate a .env file with:")
@@ -54,12 +54,12 @@ def main():
         print("  KIMI_MODEL=deepseek/deepseek-v4-pro")
         print("\nContinuing without an API key will use fallback report behavior.")
     else:
-        print("[+] .env file found")
+        print("[+] Configuration matrices loaded")
 
     # Start server
-    print("\n[*] Starting FastAPI server...")
-    print("    Dashboard: http://localhost:8000")
-    print("    API Docs: http://localhost:8000/docs")
+    print("\n[*] Powering up neural interface...")
+    print("    Holographic Interface: http://localhost:8000")
+    print("    Core API: http://localhost:8000/docs")
     print("\n    Press Ctrl+C to stop\n")
 
     try:
@@ -69,9 +69,9 @@ def main():
         # Try to open browser
         try:
             webbrowser.open("http://localhost:8000", new=2)
-            print("[+] Opening dashboard in browser...\n")
+            print("[+] Opening holographic interface...\n")
         except:
-            print("[*] Open http://localhost:8000 in your browser\n")
+            print("[*] Open http://localhost:8000 in your visor\n")
 
         # Start the server
         subprocess.run([
