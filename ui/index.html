@@ -147,6 +147,95 @@
             width: min(1500px, calc(100vw - 32px));
             margin: 0 auto;
             padding: 0 0 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: auto;
+            padding: 80px 0 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer-signature {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .footer-label {
+            color: var(--holo-cyan);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 400;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        .footer-name {
+            color: var(--ink);
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow:
+                0 0 20px rgba(0, 240, 255, 0.15),
+                0 0 40px rgba(100, 50, 200, 0.1);
+            transition: text-shadow 0.5s ease;
+        }
+
+        .footer:hover .footer-name {
+            text-shadow:
+                0 0 30px rgba(0, 240, 255, 0.3),
+                0 0 60px rgba(100, 50, 200, 0.15);
+        }
+
+        .footer-glow-line {
+            width: 100px;
+            height: 1px;
+            margin-top: 12px;
+            background: linear-gradient(90deg, transparent, var(--holo-cyan), transparent);
+            opacity: 0.4;
+            animation: footerGlowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes footerGlowPulse {
+            0%, 100% { opacity: 0.3; width: 80px; }
+            50% { opacity: 0.6; width: 120px; }
+        }
+
+        .footer-sparkles {
+            position: absolute;
+            inset: -20px -40px;
+            pointer-events: none;
+        }
+
+        .footer-sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--holo-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--holo-cyan);
+            animation: sparkleFloat 4s ease-in-out infinite;
+        }
+
+        .footer-sparkle:nth-child(1) { top: 0; left: 20%; animation-delay: 0s; }
+        .footer-sparkle:nth-child(2) { top: 40%; left: 5%; animation-delay: 1s; }
+        .footer-sparkle:nth-child(3) { top: 10%; right: 15%; animation-delay: 2s; }
+        .footer-sparkle:nth-child(4) { bottom: 20%; right: 10%; animation-delay: 0.5s; }
+        .footer-sparkle:nth-child(5) { bottom: 10%; left: 25%; animation-delay: 1.5s; }
+
+        @keyframes sparkleFloat {
+            0%, 100% { opacity: 0.2; transform: scale(1) translateY(0); }
+            50% { opacity: 0.8; transform: scale(1.5) translateY(-4px); }
         }
 
         /* ===== HERO SECTION ===== */
@@ -352,12 +441,63 @@
         .control-panel, .report-panel, .side-panel { border-radius: 4px; }
 
         .control-panel {
-            padding: 24px;
+            padding: 28px;
             margin-bottom: 22px;
             margin-top: 2px;
             background:
                 linear-gradient(145deg, rgba(0, 240, 255, 0.04), transparent 40%),
                 var(--panel-bg);
+            border: 1px solid rgba(0, 240, 255, 0.18);
+            box-shadow:
+                0 0 40px rgba(0, 240, 255, 0.04),
+                var(--shadow);
+        }
+
+        .search-prompt {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            color: var(--holo-cyan);
+            font-family: var(--font-display);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .search-prompt::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: var(--holo-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--holo-cyan);
+            animation: promptPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes promptPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        input[type="text"].search-input {
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            background: rgba(3, 1, 8, 0.85);
+            font-size: 1.1rem;
+            height: 54px;
+            animation: inputGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes inputGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+            50% { box-shadow: 0 0 16px rgba(0, 240, 255, 0.08); }
+        }
+
+        input[type="text"].search-input:focus {
+            border-color: var(--holo-cyan);
+            box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1), 0 0 30px rgba(0, 240, 255, 0.12);
+            animation: none;
         }
 
         .control-grid {
@@ -1422,15 +1562,36 @@
         }
 
         @media (max-width: 720px) {
-            .app { width: min(100vw - 20px, 1500px); padding-top: 10px; }
+            .app { width: calc(100vw - 20px); padding: 10px 0 20px; }
+            .hero { min-height: 90vh; padding: 20px 16px; }
+            .hero h1 { font-size: clamp(1.6rem, 11vw, 3rem); letter-spacing: 0.06em; }
+            .hero-sub { font-size: 0.7rem; letter-spacing: 0.12em; }
+            .hero-desc { font-size: 0.95rem; padding: 0 8px; }
+            .hero-divider { margin: 20px auto; }
+            .scroll-indicator { bottom: 20px; }
+            .section-divider { margin: 24px 0; font-size: 0.6rem; }
+            .control-panel { padding: 20px 16px; }
+            .control-grid { grid-template-columns: 1fr; gap: 12px; }
             .report-title-row, .run-row { display: block; }
-            .hero h1 { font-size: clamp(1.8rem, 12vw, 3.5rem); letter-spacing: 0.08em; }
-            .hero-sub { font-size: 0.75rem; letter-spacing: 0.15em; }
+            .run-row { margin-top: 14px; }
             .mode-grid, .stat-grid, .visual-grid { grid-template-columns: 1fr; }
-            .primary-button { width: 100%; margin-top: 14px; }
+            .mode-card { min-height: 80px; padding: 12px; }
+            .primary-button { width: 100%; margin-top: 14px; min-width: unset; height: 48px; }
             .status-pill { display: inline-block; margin-top: 12px; }
-            .draft-banner { grid-template-columns: 1fr; }
-            .view-tabs { flex-wrap: wrap; }
+            .draft-banner { grid-template-columns: 1fr; gap: 12px; }
+            .view-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .tab { padding: 12px 14px; font-size: 0.7rem; white-space: nowrap; }
+            .tab-slider { display: none; }
+            .report-body { padding: 16px; max-height: none; }
+            .report-head { padding: 16px; }
+            .side-panel { padding: 16px; }
+            .empty-state { min-height: 300px; }
+            .cook-card { padding: 20px; }
+            .visual-grid { grid-template-columns: 1fr; }
+            .visual-card { min-height: 240px; }
+            .telemetry-feed { padding: 10px 12px; font-size: 0.7rem; }
+            .footer { padding: 24px 0 16px; font-size: 0.65rem; }
+            input[type="text"].search-input { height: 48px; font-size: 1rem; }
         }
     </style>
 </head>
@@ -1483,7 +1644,6 @@
             const canvas = document.getElementById("void-canvas");
             if (!canvas) return;
             const ctx = canvas.getContext("2d");
-            let particles = [];
             let width, height;
 
             function resize() {
@@ -1493,51 +1653,197 @@
             resize();
             window.addEventListener("resize", resize);
 
-            const PARTICLE_COUNT = 140;
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                particles.push({
+            /* Star field */
+            let stars = [];
+            const STAR_COUNT = 220;
+            for (let i = 0; i < STAR_COUNT; i++) {
+                const t = Math.random();
+                let color;
+                if (t < 0.05) color = [0, 240, 255];
+                else if (t < 0.15) color = [180, 200, 255];
+                else if (t < 0.25) color = [255, 220, 180];
+                else color = [200, 200, 220];
+                stars.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    vx: (Math.random() - 0.5) * 0.25,
-                    vy: (Math.random() - 0.5) * 0.25,
-                    size: Math.random() * 1.5 + 0.5,
+                    size: Math.random() * 1.3 + 0.2,
                     alpha: Math.random() * 0.5 + 0.1,
-                    pulse: Math.random() * Math.PI * 2,
-                    color: Math.random() > 0.7 ? [0, 240, 255] : [100, 50, 200]
+                    pulseSpeed: Math.random() * 0.015 + 0.003,
+                    pulseOffset: Math.random() * Math.PI * 2,
+                    color
                 });
             }
 
+            /* Galaxies — prominent, awe-inspiring */
+            let galaxies = [
+                { x: width * 0.12, y: height * 0.3, size: 140, rotation: 0.4, rotSpeed: 0.00015, hue: 195, tilt: 0.35, arms: 3 },
+                { x: width * 0.88, y: height * 0.7, size: 110, rotation: 2.1, rotSpeed: -0.0002, hue: 265, tilt: 0.55, arms: 2 },
+                { x: width * 0.5, y: height * 0.85, size: 80, rotation: 1.0, rotSpeed: 0.00025, hue: 320, tilt: 0.7, arms: 2 }
+            ];
+
+            /* No black hole — galaxies only */
+
+            function drawGalaxy(g, time) {
+                g.rotation += g.rotSpeed;
+                ctx.save();
+                ctx.translate(g.x, g.y);
+                ctx.rotate(g.rotation);
+                ctx.scale(1, g.tilt);
+
+                /* Bright core */
+                const core = ctx.createRadialGradient(0, 0, 0, 0, 0, g.size * 0.4);
+                core.addColorStop(0, `hsla(${g.hue}, 50%, 85%, 0.25)`);
+                core.addColorStop(0.5, `hsla(${g.hue}, 45%, 60%, 0.12)`);
+                core.addColorStop(1, `hsla(${g.hue}, 40%, 40%, 0)`);
+                ctx.fillStyle = core;
+                ctx.beginPath();
+                ctx.arc(0, 0, g.size * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+
+                /* Outer halo */
+                const halo = ctx.createRadialGradient(0, 0, g.size * 0.3, 0, 0, g.size);
+                halo.addColorStop(0, `hsla(${g.hue}, 35%, 50%, 0.08)`);
+                halo.addColorStop(1, `hsla(${g.hue}, 30%, 30%, 0)`);
+                ctx.fillStyle = halo;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, g.size, g.size * 0.65, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                /* Spiral arms with bright knots */
+                for (let arm = 0; arm < g.arms; arm++) {
+                    const offset = arm * (Math.PI * 2 / g.arms);
+                    for (let s = 3; s < 40; s++) {
+                        const a = offset + s * 0.18;
+                        const d = s * (g.size / 32);
+                        const px = Math.cos(a) * d;
+                        const py = Math.sin(a) * d * 0.5;
+                        const progress = 1 - s / 40;
+                        const sz = progress * 2.5;
+                        const brightness = progress * 0.18;
+                        ctx.beginPath();
+                        ctx.arc(px, py, sz, 0, Math.PI * 2);
+                        ctx.fillStyle = `hsla(${g.hue + s * 2}, 55%, 75%, ${brightness})`;
+                        ctx.fill();
+                        /* Bright knots */
+                        if (s % 7 === 0) {
+                            ctx.beginPath();
+                            ctx.arc(px, py, sz * 1.8, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsla(${g.hue + 20}, 60%, 80%, ${brightness * 0.6})`;
+                            ctx.fill();
+                        }
+                    }
+                }
+                ctx.restore();
+            }
+
+            function drawBlackHole(bh, time) {
+                bh.rot += 0.012;
+                const flicker = 0.8 + 0.2 * Math.sin(time * 0.0012);
+                const x = bh.x, y = bh.y, s = bh.size;
+
+                /* Gravitational lensing glow (large) */
+                const lens = ctx.createRadialGradient(x, y, s, x, y, s * 10);
+                lens.addColorStop(0, `rgba(0, 0, 0, 0.98)`);
+                lens.addColorStop(0.08, `rgba(20, 10, 40, ${0.25 * flicker})`);
+                lens.addColorStop(0.2, `rgba(80, 40, 140, ${0.12 * flicker})`);
+                lens.addColorStop(0.35, `rgba(0, 240, 255, ${0.06 * flicker})`);
+                lens.addColorStop(0.6, `rgba(60, 30, 100, ${0.02 * flicker})`);
+                lens.addColorStop(1, `rgba(0, 0, 0, 0)`);
+                ctx.fillStyle = lens;
+                ctx.fillRect(x - s * 10, y - s * 10, s * 20, s * 20);
+
+                /* Main accretion disk */
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(bh.rot);
+                ctx.scale(1, 0.22);
+
+                /* Disk body */
+                const diskBody = ctx.createRadialGradient(0, 0, s * 0.9, 0, 0, s * 3.5);
+                diskBody.addColorStop(0, `rgba(0, 0, 0, 0)`);
+                diskBody.addColorStop(0.25, `rgba(0, 240, 255, ${0.35 * flicker})`);
+                diskBody.addColorStop(0.5, `rgba(140, 60, 255, ${0.25 * flicker})`);
+                diskBody.addColorStop(0.75, `rgba(255, 100, 80, ${0.12 * flicker})`);
+                diskBody.addColorStop(1, `rgba(0, 0, 0, 0)`);
+                ctx.fillStyle = diskBody;
+                ctx.beginPath();
+                ctx.arc(0, 0, s * 3.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                /* Inner bright ring */
+                const innerRing = ctx.createRadialGradient(0, 0, s * 0.8, 0, 0, s * 1.6);
+                innerRing.addColorStop(0, `rgba(0, 0, 0, 0)`);
+                innerRing.addColorStop(0.5, `rgba(200, 240, 255, ${0.5 * flicker})`);
+                innerRing.addColorStop(1, `rgba(0, 0, 0, 0)`);
+                ctx.fillStyle = innerRing;
+                ctx.beginPath();
+                ctx.arc(0, 0, s * 1.6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                /* Shadow body (black sphere) */
+                ctx.beginPath();
+                ctx.arc(x, y, s * 0.85, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(0, 0, 0, 0.95)";
+                ctx.fill();
+
+                /* Photon ring (thin bright edge) */
+                ctx.beginPath();
+                ctx.arc(x, y, s * 0.9, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(180, 240, 255, ${0.6 * flicker})`;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                /* Doppler bright spot (approaching side) */
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(bh.rot);
+                ctx.scale(1, 0.22);
+                const bright = ctx.createRadialGradient(s * 1.2, 0, 0, 0, 0, s * 2);
+                bright.addColorStop(0, `rgba(255, 255, 255, ${0.3 * flicker})`);
+                bright.addColorStop(1, `rgba(0, 0, 0, 0)`);
+                ctx.fillStyle = bright;
+                ctx.beginPath();
+                ctx.arc(0, 0, s * 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
             function draw() {
+                const time = Date.now();
                 ctx.clearRect(0, 0, width, height);
-                for (let p of particles) {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.pulse += 0.015;
-                    if (p.x < 0) p.x = width;
-                    if (p.x > width) p.x = 0;
-                    if (p.y < 0) p.y = height;
-                    if (p.y > height) p.y = 0;
-                    const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+
+                /* Galaxies (behind stars) */
+                for (let g of galaxies) {
+                    drawGalaxy(g, time);
+                }
+
+                /* Stars */
+                for (let s of stars) {
+                    const pulse = 0.75 + 0.25 * Math.sin(time * s.pulseSpeed + s.pulseOffset);
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(${p.color[0]}, ${p.color[1]}, ${p.color[2]}, ${a})`;
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${s.color[0]}, ${s.color[1]}, ${s.color[2]}, ${s.alpha * pulse})`;
                     ctx.fill();
                 }
-                ctx.strokeStyle = "rgba(0, 240, 255, 0.025)";
+
+                /* Constellation lines */
+                ctx.strokeStyle = "rgba(200, 210, 255, 0.012)";
                 ctx.lineWidth = 0.5;
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
+                for (let i = 0; i < stars.length; i++) {
+                    for (let j = i + 1; j < stars.length; j++) {
+                        const dx = stars[i].x - stars[j].x;
+                        const dy = stars[i].y - stars[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 130) {
+                        if (dist < 110) {
                             ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.moveTo(stars[i].x, stars[i].y);
+                            ctx.lineTo(stars[j].x, stars[j].y);
                             ctx.stroke();
                         }
                     }
                 }
+
                 requestAnimationFrame(draw);
             }
             draw();
@@ -1698,10 +2004,12 @@
                 h("section", { id: "workbench", className: "workbench" },
                     h("div", null,
                         h("section", { className: "control-panel panel reveal reveal-delay-1" },
+                            h("div", { className: "search-prompt" }, "Start Here"),
                             h("div", { className: "control-grid" },
                                 field("Research Directive",
                                     h("input", {
                                         type: "text",
+                                        className: "search-input",
                                         value: topic,
                                         onChange: event => setTopic(event.target.value),
                                         onKeyDown: event => { if (event.key === "Enter") startResearch(); },
@@ -1850,6 +2158,24 @@
                                 : h("p", { className: "possibility" }, "Past directives will appear in the archive.")
                         )
                     )
+                ),
+                h(Footer)
+            );
+        }
+
+        function Footer() {
+            return h("footer", { className: "footer" },
+                h("div", { className: "footer-signature" },
+                    h("div", { className: "footer-sparkles" },
+                        h("span", { className: "footer-sparkle" }),
+                        h("span", { className: "footer-sparkle" }),
+                        h("span", { className: "footer-sparkle" }),
+                        h("span", { className: "footer-sparkle" }),
+                        h("span", { className: "footer-sparkle" })
+                    ),
+                    h("span", { className: "footer-label" }, "Crafted by"),
+                    h("span", { className: "footer-name" }, "Uday Reddy"),
+                    h("div", { className: "footer-glow-line" })
                 )
             );
         }
