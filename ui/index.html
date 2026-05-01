@@ -652,18 +652,25 @@
         }
 
         .progress-track {
-            height: 4px;
+            height: 6px;
             border-radius: 0;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04);
             overflow: hidden;
             position: relative;
+        }
+
+        .progress-track::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(0, 240, 255, 0.06) 8px, rgba(0, 240, 255, 0.06) 9px);
         }
 
         .progress-fill {
             height: 100%;
             width: 0;
             background: linear-gradient(90deg, var(--holo-cyan), var(--amber));
-            box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35), 0 0 40px rgba(0, 240, 255, 0.1);
             transition: width 0.8s var(--ease-cinematic);
             position: relative;
         }
@@ -672,16 +679,115 @@
             content: "";
             position: absolute;
             right: 0;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
-            animation: progressShimmer 2s ease-in-out infinite;
+            top: -2px;
+            bottom: -2px;
+            width: 4px;
+            background: var(--holo-cyan);
+            box-shadow: 0 0 12px var(--holo-cyan), 0 0 24px var(--holo-cyan);
+            animation: progressPulse 1.5s ease-in-out infinite;
         }
 
-        @keyframes progressShimmer {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
+        @keyframes progressPulse {
+            0%, 100% { opacity: 0.6; box-shadow: 0 0 8px var(--holo-cyan); }
+            50% { opacity: 1; box-shadow: 0 0 20px var(--holo-cyan), 0 0 40px rgba(0, 240, 255, 0.3); }
+        }
+
+        /* ===== LIVE TELEMETRY ===== */
+        .telemetry-feed {
+            margin-top: 16px;
+            border: 1px solid var(--panel-border);
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px 16px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            line-height: 1.6;
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .telemetry-feed::before {
+            content: ">>> LIVE TELEMETRY";
+            display: block;
+            color: var(--holo-cyan);
+            letter-spacing: 0.15em;
+            font-size: 0.65rem;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        .telemetry-line {
+            color: var(--muted);
+            opacity: 0;
+            transform: translateX(-8px);
+            animation: telemetryIn 0.4s var(--ease-cinematic) forwards;
+        }
+
+        .telemetry-line.active { color: var(--holo-cyan); }
+        .telemetry-line.done { color: var(--green); opacity: 0.5; }
+        .telemetry-line.warn { color: var(--amber); }
+
+        @keyframes telemetryIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== SCAN SWEEP ===== */
+        .scan-sweep {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .scan-sweep::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.03), transparent);
+            animation: scanSweep 3s ease-in-out infinite;
+        }
+
+        @keyframes scanSweep {
+            0% { left: -60%; }
+            100% { left: 100%; }
+        }
+
+        /* ===== EVIDENCE ENTRANCE ===== */
+        .evidence-card {
+            border: 1px solid var(--panel-border);
+            border-left: 2px solid var(--holo-cyan);
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
+            transition: background 0.3s var(--ease-cinematic), transform 0.3s var(--ease-cinematic), box-shadow 0.3s var(--ease-cinematic);
+            opacity: 0;
+            transform: translateY(12px) translateX(-4px);
+            animation: evidenceIn 0.5s var(--ease-cinematic) forwards;
+        }
+
+        @keyframes evidenceIn {
+            to { opacity: 1; transform: translateY(0) translateX(0); }
+        }
+
+        .evidence-card:hover {
+            background: rgba(0, 240, 255, 0.03);
+            transform: translateX(4px);
+            box-shadow: -4px 0 16px rgba(0, 240, 255, 0.06);
+        }
+
+        /* ===== STATUS PULSE ===== */
+        .status-pill.pulse {
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 158, 64, 0.2); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 158, 64, 0); }
         }
 
         /* ===== KINETIC TABS ===== */
@@ -944,20 +1050,7 @@
 
         .evidence-list { display: grid; gap: 12px; }
 
-        .evidence-card {
-            border: 1px solid var(--panel-border);
-            border-left: 2px solid var(--holo-cyan);
-            border-radius: 2px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 16px;
-            transition: background 0.3s var(--ease-cinematic), transform 0.3s var(--ease-cinematic), box-shadow 0.3s var(--ease-cinematic);
-        }
-
-        .evidence-card:hover {
-            background: rgba(0, 240, 255, 0.03);
-            transform: translateX(4px);
-            box-shadow: -4px 0 16px rgba(0, 240, 255, 0.06);
-        }
+        /* evidence-card styles moved above with animation */
 
         .visual-grid {
             display: grid;
@@ -1678,7 +1771,7 @@
                                         h("h2", { className: "report-title" }, session ? session.topic : "No Active Signal"),
                                         h("div", { className: "phase-copy" }, `${activeMode.name} \u2014 ${activeMode.expected}`)
                                     ),
-                                    h("div", { className: "status-pill" }, statusLabel(session))
+                                    h("div", { className: `status-pill ${session && session.status !== "completed" && session.status !== "failed" ? "pulse" : ""}` }, statusLabel(session))
                                 ),
                                 h("div", { className: "progress-shell" },
                                     h("div", { className: "progress-meta" },
@@ -1687,7 +1780,10 @@
                                     ),
                                     h("div", { className: "progress-track" },
                                         h("div", { className: "progress-fill", style: { width: `${progress.value}%` } })
-                                    )
+                                    ),
+                                    session && session.status !== "completed" && session.status !== "failed"
+                                        ? h(TelemetryFeed, { session, evidence })
+                                        : null
                                 )
                             ),
                             h("div", { className: "view-tabs", ref: tabsRef },
@@ -1760,7 +1856,7 @@
 
         function HeroSection({ onScrollToWorkbench }) {
             const [typed, setTyped] = React.useState("");
-            const fullText = "EXTRATERRESTRIAL INTELLIGENCE GATHERING SYSTEM";
+            const fullText = "THE LAST SEARCH ENGINE YOU WILL EVER NEED";
             React.useEffect(() => {
                 let i = 0;
                 const interval = setInterval(() => {
@@ -1782,7 +1878,7 @@
                     h("div", { className: "hero-sub" }, typed, h("span", { style: { opacity: 0.6 } }, "\u2588")),
                     h("div", { className: "hero-divider" }),
                     h("p", { className: "hero-desc" },
-                        "An autonomous probe for the digital void. Deploys signal-acquisition arrays across the live web, harvests verifiable data fragments, and synthesizes intelligence briefs with full traceability."
+                        "It scours the live web, pulls verified sources, and builds traceable research reports \u2014 so you get answers with receipts, not guesses."
                     )
                 ),
                 h("button", {
@@ -1955,15 +2051,17 @@
         function renderCookingState(session, evidence) {
             const mode = getSessionMode(session);
             if (mode === "fast") {
-                return h("div", { className: "empty-state" },
-                    h("div", null,
+                return h("div", { className: "empty-state", style: { position: "relative" } },
+                    h("div", { className: "scan-sweep" }),
+                    h("div", { style: { position: "relative", zIndex: 1 } },
                         h("strong", null, "Rapid sweep in progress"),
                         h("span", null, evidence.length ? `${evidence.length} fragments acquired.` : "Sensor arrays warming up.")
                     )
                 );
             }
-            return h("div", { className: "empty-state" },
-                h("div", { className: "cook-card" },
+            return h("div", { className: "empty-state", style: { position: "relative" } },
+                h("div", { className: "scan-sweep" }),
+                h("div", { className: "cook-card", style: { position: "relative", zIndex: 1 } },
                     h("div", { className: "cook-kicker" }, mode === "deep" ? "Deep probe active" : "Standard survey active"),
                     h("div", { className: "cook-title" }, pickForSession(COOK_LINES, session, 0)),
                     h("div", { className: "cook-copy" },
@@ -1975,6 +2073,56 @@
                         h("div", { className: "fact-badge" }, "?"),
                         h("div", { className: "fact-text" }, pickForSession(WAIT_FACTS, session, 0))
                     )
+                )
+            );
+        }
+
+        function TelemetryFeed({ session, evidence }) {
+            const [lines, setLines] = React.useState([]);
+            const prevPhase = React.useRef("");
+            const prevEvidenceCount = React.useRef(0);
+
+            React.useEffect(() => {
+                if (!session) return;
+                const newLines = [];
+                const phase = session.phase || "";
+                const status = session.status || "";
+                const evCount = evidence.length;
+
+                if (status === "planning" || status === "executing") {
+                    newLines.push({ text: `Phase: ${phase.replace("phase_", "")} | Status: ${status}`, type: "active" });
+                }
+                if (evCount > prevEvidenceCount.current) {
+                    newLines.push({ text: `Fragment acquired [${evCount}]`, type: "done" });
+                }
+                if (phase === "phase_2" && prevPhase.current === "phase_1") {
+                    newLines.push({ text: "Verification sequence initiated", type: "warn" });
+                }
+                if (phase === "phase_3" && prevPhase.current === "phase_2") {
+                    newLines.push({ text: "Synthesis matrix engaged", type: "active" });
+                }
+
+                prevPhase.current = phase;
+                prevEvidenceCount.current = evCount;
+
+                if (newLines.length > 0) {
+                    setLines(prev => [...prev.slice(-4), ...newLines]);
+                }
+            }, [session, evidence.length]);
+
+            if (lines.length === 0) {
+                return h("div", { className: "telemetry-feed" },
+                    h("div", { className: "telemetry-line", style: { animationDelay: "0s" } }, "Awaiting telemetry...")
+                );
+            }
+
+            return h("div", { className: "telemetry-feed" },
+                lines.map((line, i) =>
+                    h("div", {
+                        key: i,
+                        className: `telemetry-line ${line.type}`,
+                        style: { animationDelay: `${i * 0.05}s` }
+                    }, `> ${line.text}`)
                 )
             );
         }
