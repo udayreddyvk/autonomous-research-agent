@@ -1594,30 +1594,7 @@
             .telemetry-feed { padding: 10px 12px; font-size: 0.7rem; }
             .footer { padding: 24px 0 16px; font-size: 0.65rem; }
             input[type="text"].search-input { height: 48px; font-size: 1rem; }
-        }
-            .section-divider { margin: 24px 0; font-size: 0.6rem; }
-            .control-panel { padding: 20px 16px; }
-            .control-grid { grid-template-columns: 1fr; gap: 12px; }
-            .report-title-row, .run-row { display: block; }
-            .run-row { margin-top: 14px; }
-            .mode-grid, .stat-grid, .visual-grid { grid-template-columns: 1fr; }
-            .mode-card { min-height: 80px; padding: 12px; }
-            .primary-button { width: 100%; margin-top: 14px; min-width: unset; height: 48px; }
-            .status-pill { display: inline-block; margin-top: 12px; }
-            .draft-banner { grid-template-columns: 1fr; gap: 12px; }
-            .view-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .tab { padding: 12px 14px; font-size: 0.7rem; white-space: nowrap; }
-            .tab-slider { display: none; }
-            .report-body { padding: 16px; max-height: none; }
-            .report-head { padding: 16px; }
-            .side-panel { padding: 16px; }
-            .empty-state { min-height: 300px; }
-            .cook-card { padding: 20px; }
-            .visual-grid { grid-template-columns: 1fr; }
-            .visual-card { min-height: 240px; }
-            .telemetry-feed { padding: 10px 12px; font-size: 0.7rem; }
-            .footer { padding: 24px 0 16px; font-size: 0.65rem; }
-            input[type="text"].search-input { height: 48px; font-size: 1rem; }
+            .footer-name { font-size: 1rem; letter-spacing: 0.15em; }
         }
     </style>
 </head>
@@ -1670,18 +1647,25 @@
             const canvas = document.getElementById("void-canvas");
             if (!canvas) return;
             const ctx = canvas.getContext("2d");
-            let width, height;
+            let width, height, dpr;
+            const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
             function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
+                dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + "px";
+                canvas.style.height = height + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
             resize();
             window.addEventListener("resize", resize);
 
-            /* Star field */
+            /* Star field — fewer on mobile */
             let stars = [];
-            const STAR_COUNT = 220;
+            const STAR_COUNT = isMobile ? 50 : 90;
             for (let i = 0; i < STAR_COUNT; i++) {
                 const t = Math.random();
                 let color;
@@ -1700,14 +1684,13 @@
                 });
             }
 
-            /* Galaxies — prominent, awe-inspiring */
+            /* Galaxies — fewer particles on mobile */
             let galaxies = [
                 { x: width * 0.12, y: height * 0.3, size: 140, rotation: 0.4, rotSpeed: 0.00015, hue: 195, tilt: 0.35, arms: 3 },
                 { x: width * 0.88, y: height * 0.7, size: 110, rotation: 2.1, rotSpeed: -0.0002, hue: 265, tilt: 0.55, arms: 2 },
                 { x: width * 0.5, y: height * 0.85, size: 80, rotation: 1.0, rotSpeed: 0.00025, hue: 320, tilt: 0.7, arms: 2 }
             ];
-
-            /* No black hole — galaxies only */
+            const GALAXY_ARM_STEPS = isMobile ? 18 : 28;
 
             function drawGalaxy(g, time) {
                 g.rotation += g.rotSpeed;
@@ -1738,12 +1721,12 @@
                 /* Spiral arms with bright knots */
                 for (let arm = 0; arm < g.arms; arm++) {
                     const offset = arm * (Math.PI * 2 / g.arms);
-                    for (let s = 3; s < 40; s++) {
+                    for (let s = 3; s < GALAXY_ARM_STEPS; s++) {
                         const a = offset + s * 0.18;
                         const d = s * (g.size / 32);
                         const px = Math.cos(a) * d;
                         const py = Math.sin(a) * d * 0.5;
-                        const progress = 1 - s / 40;
+                        const progress = 1 - s / GALAXY_ARM_STEPS;
                         const sz = progress * 2.5;
                         const brightness = progress * 0.18;
                         ctx.beginPath();
@@ -1835,7 +1818,57 @@
                 ctx.restore();
             }
 
+            /* Build a simple spatial grid so constellation lines are O(n) instead of O(n²) */
+            function drawConstellationLines() {
+                const cellSize = 120;
+                const cols = Math.ceil(width / cellSize);
+                const grid = new Map();
+                for (let i = 0; i < stars.length; i++) {
+                    const s = stars[i];
+                    const cx = Math.floor(s.x / cellSize);
+                    const cy = Math.floor(s.y / cellSize);
+                    const key = cx + "," + cy;
+                    if (!grid.has(key)) grid.set(key, []);
+                    grid.get(key).push(i);
+                }
+                ctx.strokeStyle = "rgba(200, 210, 255, 0.012)";
+                ctx.lineWidth = 0.5;
+                const drawn = new Set();
+                for (let i = 0; i < stars.length; i++) {
+                    const s = stars[i];
+                    const cx = Math.floor(s.x / cellSize);
+                    const cy = Math.floor(s.y / cellSize);
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            const key = (cx + dx) + "," + (cy + dy);
+                            const neighbors = grid.get(key);
+                            if (!neighbors) continue;
+                            for (let j of neighbors) {
+                                if (j <= i) continue;
+                                const pair = i + "-" + j;
+                                if (drawn.has(pair)) continue;
+                                const dist = Math.hypot(s.x - stars[j].x, s.y - stars[j].y);
+                                if (dist < 110) {
+                                    ctx.beginPath();
+                                    ctx.moveTo(s.x, s.y);
+                                    ctx.lineTo(stars[j].x, stars[j].y);
+                                    ctx.stroke();
+                                    drawn.add(pair);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            let running = true;
+            document.addEventListener("visibilitychange", () => {
+                running = !document.hidden;
+                if (running) draw();
+            });
+
             function draw() {
+                if (!running) return;
                 const time = Date.now();
                 ctx.clearRect(0, 0, width, height);
 
@@ -1853,23 +1886,7 @@
                     ctx.fill();
                 }
 
-                /* Constellation lines */
-                ctx.strokeStyle = "rgba(200, 210, 255, 0.012)";
-                ctx.lineWidth = 0.5;
-                for (let i = 0; i < stars.length; i++) {
-                    for (let j = i + 1; j < stars.length; j++) {
-                        const dx = stars[i].x - stars[j].x;
-                        const dy = stars[i].y - stars[j].y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 110) {
-                            ctx.beginPath();
-                            ctx.moveTo(stars[i].x, stars[i].y);
-                            ctx.lineTo(stars[j].x, stars[j].y);
-                            ctx.stroke();
-                        }
-                    }
-                }
-
+                drawConstellationLines();
                 requestAnimationFrame(draw);
             }
             draw();
@@ -1931,6 +1948,7 @@
             React.useEffect(() => {
                 if (!sessionId) return;
                 let cancelled = false;
+                let timeoutId = null;
                 const poll = async () => {
                     try {
                         const response = await fetch(`${API_BASE}/api/research/${sessionId}`);
@@ -1945,18 +1963,19 @@
                             await loadReport(sessionId, setReport, setMessage);
                             loadedReportPath.current = reportPath;
                         }
-                        if (data.status === "completed") return;
-                        if (data.status === "failed") {
-                            setReport("");
+                        if (data.status === "completed" || data.status === "failed") {
+                            if (data.status === "failed") setReport("");
                             return;
                         }
-                        window.setTimeout(poll, 1400);
                     } catch (error) {
                         if (!cancelled) setMessage(error.message);
                     }
+                    if (!cancelled) {
+                        timeoutId = window.setTimeout(poll, 2000);
+                    }
                 };
                 poll();
-                return () => { cancelled = true; };
+                return () => { cancelled = true; if (timeoutId) clearTimeout(timeoutId); };
             }, [sessionId]);
 
             React.useEffect(() => {

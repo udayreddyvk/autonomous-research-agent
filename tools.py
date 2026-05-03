@@ -55,46 +55,62 @@ def _get_openai() -> Any:
     return _openai
 
 
-def search_web(query: str, max_results: int = 5) -> List[Dict[str, str]]:
-    """Search DuckDuckGo and return structured results."""
-    try:
-        if DDGS is None:
-            return []
-        with DDGS() as ddgs:
-            results = ddgs.text(query, max_results=max_results)
-            return [
-                {
-                    "title": r.get("title", ""),
-                    "url": r.get("href", ""),
-                    "snippet": r.get("body", "")
-                }
-                for r in results
-                if r.get("href")
-            ]
-    except Exception as e:
-        print(f"[search_web] Error: {e}")
+def search_web(query: str, max_results: int = 5, retries: int = 3) -> List[Dict[str, str]]:
+    """Search DuckDuckGo and return structured results with retries."""
+    if DDGS is None:
         return []
 
-
-def scrape_page(url: str) -> Dict[str, Any]:
-    """Scrape a page using Firecrawl, fallback to basic requests."""
-    try:
-        fc = _get_firecrawl()
-        if fc:
-            if hasattr(fc, "scrape_url"):
-                result = fc.scrape_url(url, params={"formats": ["markdown"]})
+    for attempt in range(1, retries + 1):
+        try:
+            with DDGS() as ddgs:
+                results = ddgs.text(query, max_results=max_results)
+                parsed = [
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("href", ""),
+                        "snippet": r.get("body", "")
+                    }
+                    for r in results
+                    if r.get("href")
+                ]
+                if parsed:
+                    return parsed
+                # Empty but valid response — don't burn retries, just return
+                return []
+        except Exception as e:
+            print(f"[search_web] Attempt {attempt}/{retries} failed for '{query[:60]}...': {e}")
+            if attempt < retries:
+                import time
+                time.sleep(1.5 * attempt)  # exponential-ish backoff
             else:
-                result = fc.scrape(url, formats=["markdown"])
+                print(f"[search_web] All retries exhausted for '{query[:60]}...'")
+    return []
 
-            markdown, title = _extract_firecrawl_content(result, url)
-            return {
-                "url": url,
-                "title": title,
-                "markdown": _truncate_text(markdown, 12000),
-                "success": bool(markdown)
-            }
-    except Exception as e:
-        print(f"[scrape_page] Firecrawl failed for {url}: {e}")
+
+def scrape_page(url: str, retries: int = 2) -> Dict[str, Any]:
+    """Scrape a page using Firecrawl, fallback to basic requests."""
+    for attempt in range(1, retries + 1):
+        try:
+            fc = _get_firecrawl()
+            if fc:
+                if hasattr(fc, "scrape_url"):
+                    result = fc.scrape_url(url, params={"formats": ["markdown"]})
+                else:
+                    result = fc.scrape(url, formats=["markdown"])
+
+                markdown, title = _extract_firecrawl_content(result, url)
+                if markdown:
+                    return {
+                        "url": url,
+                        "title": title,
+                        "markdown": _truncate_text(markdown, 12000),
+                        "success": True
+                    }
+        except Exception as e:
+            print(f"[scrape_page] Firecrawl attempt {attempt}/{retries} failed for {url}: {e}")
+            if attempt < retries:
+                import time
+                time.sleep(1.0 * attempt)
 
     # Fallback: basic requests + regex strip HTML
     try:
@@ -168,25 +184,31 @@ def _extract_firecrawl_content(result: Any, url: str) -> tuple[str, str]:
 async def call_llm(
     messages: List[Dict[str, str]],
     model: Optional[str] = None,
-    max_tokens: int = 4000
+    max_tokens: int = 4000,
+    retries: int = 2
 ) -> str:
-    """Call the LLM via OpenAI-compatible Kimi API."""
+    """Call the LLM via OpenAI-compatible Kimi API with retries."""
     client = _get_openai()
     if not client:
         print("[call_llm] No LLM client available. Check KIMI_API_KEY.")
         return ""
 
-    try:
-        response = await client.chat.completions.create(
-            model=model or Config.kimi_model,
-            messages=messages,
-            temperature=0.5,
-            max_tokens=max_tokens
-        )
-        return response.choices[0].message.content or ""
-    except Exception as e:
-        print(f"[call_llm] Error: {e}")
-        return ""
+    for attempt in range(1, retries + 1):
+        try:
+            response = await client.chat.completions.create(
+                model=model or Config.kimi_model,
+                messages=messages,
+                temperature=0.5,
+                max_tokens=max_tokens
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            print(f"[call_llm] Attempt {attempt}/{retries} failed: {e}")
+            if attempt < retries:
+                await asyncio.sleep(1.5 * attempt)
+            else:
+                print(f"[call_llm] All retries exhausted.")
+    return ""
 
 
 async def generate_research_plan(topic: str, depth: int, model: Optional[str] = None) -> List[str]:

@@ -112,6 +112,8 @@ class Phase1Agent(BaseAgent):
                 )
                 if not results:
                     self.log(session.session_id, f"No search results for: {question}")
+                    # Brief backoff so we don't hammer the search provider
+                    await asyncio.sleep(0.8)
                     continue
 
                 # Search snippets provide useful cited evidence when pages block scraping.
@@ -179,6 +181,9 @@ class Phase1Agent(BaseAgent):
                             f"  -> Claim: {claim['claim'][:80]}..."
                         )
 
+                # Brief pause between search rounds to avoid rate limits
+                await asyncio.sleep(0.5)
+
                 # Update progress
                 progress = session.progress
                 progress["phase_1"]["iterations"] = i + 1
@@ -188,6 +193,24 @@ class Phase1Agent(BaseAgent):
                     progress=progress
                 )
 
+            # Last-resort: if every sub-question came up empty, try the raw topic once
+            if not session.evidence_bank:
+                self.log(session.session_id, "Plan searches exhausted. Trying raw topic fallback...")
+                fallback_results = await asyncio.to_thread(
+                    search_web,
+                    session.topic,
+                    max_results=settings["search_results"]
+                )
+                for result in fallback_results:
+                    snippet_claim = claim_from_search_result(result, session.topic)
+                    if snippet_claim:
+                        orchestrator.add_evidence(
+                            session.session_id,
+                            claim=snippet_claim["claim"],
+                            source_url=snippet_claim["source_url"],
+                            confidence=snippet_claim["confidence"]
+                        )
+
             progress = session.progress
             progress["phase_1"]["status"] = "completed"
             orchestrator.update_session(session.session_id, progress=progress)
@@ -196,7 +219,7 @@ class Phase1Agent(BaseAgent):
             if not session.evidence_bank:
                 orchestrator.add_error(
                     session.session_id,
-                    "No evidence was collected. Web search returned no usable results, or all sources were blocked."
+                    "No evidence was collected after retries. The web search provider may be rate-limiting requests, or the topic returned no indexed results. Try again in a few moments."
                 )
                 return False
             return True
@@ -240,6 +263,10 @@ class Phase2Agent(BaseAgent):
             evidence = list(session.evidence_bank)[:settings["verify_claims"]]
             for i, claim in enumerate(evidence):
                 self.log(session.session_id, f"Verifying claim {i+1}/{len(evidence)}")
+
+                # Throttle verification searches to avoid rate limits
+                if i > 0:
+                    await asyncio.sleep(0.6)
 
                 # Search for corroboration
                 search_results = await asyncio.to_thread(
@@ -290,7 +317,7 @@ class Phase2Agent(BaseAgent):
                     evidence_bank=session.evidence_bank
                 )
 
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.3)
 
             progress = session.progress
             progress["phase_2"]["status"] = "completed"
