@@ -1607,40 +1607,40 @@
         const API_BASE = window.location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
 
         const MODES = [
-            { id: "fast", name: "Rapid Scan", copy: "Low-intensity sweep for immediate situational awareness.", expected: "Fastest" },
-            { id: "balanced", name: "Standard Survey", copy: "Moderate-depth analysis with verified source extraction.", expected: "Recommended" },
-            { id: "deep", name: "Deep Probe", copy: "Maximum rigor. Full-spectrum verification and synthesis.", expected: "Most rigorous" },
+            { id: "fast", name: "Quick Run", copy: "Fast, surface-level overview for when you need a quick read.", expected: "Fastest" },
+            { id: "balanced", name: "Balanced", copy: "Moderate depth with source verification.", expected: "Recommended" },
+            { id: "deep", name: "Deep Dive", copy: "Maximum depth. Full verification and detailed reporting.", expected: "Most rigorous" },
         ];
 
         const PHASES = [
-            { id: "phase_1", name: "Acquisition", copy: "Planning, scanning, collecting data fragments" },
-            { id: "phase_2", name: "Verification", copy: "Cross-referencing selected signals" },
-            { id: "phase_3", name: "Synthesis", copy: "Compiling the final intelligence brief" },
-            { id: "phase_4", name: "Complete", copy: "Intel ready for review" },
+            { id: "phase_1", name: "Research", copy: "Planning, searching, and collecting sources" },
+            { id: "phase_2", name: "Verification", copy: "Cross-referencing selected claims" },
+            { id: "phase_3", name: "Report", copy: "Compiling the final report" },
+            { id: "phase_4", name: "Complete", copy: "Ready for review" },
         ];
 
         const COOK_LINES = [
-            "Initiating deep space scan. Stand by for signal decryption.",
-            "Processing interstellar data streams. Filtering noise from intelligence.",
-            "Probe deployed. Harvesting fragments from the digital void.",
-            "Calibrating sensors. The web is vast; we seek only the signal.",
-            "Engaging acquisition arrays. Truth is buried in the noise."
+            "Starting research. Pulling live sources.",
+            "Processing search results. Filtering signal from noise.",
+            "Agents deployed. Harvesting sources from the web.",
+            "Calibrating queries. The web is vast; we seek only relevant signal.",
+            "Running search queries. Truth is buried in the noise."
         ];
 
         const WAIT_FACTS = [
-            "The Voyager 1 probe carries a golden record with Earth's sounds — launched in 1977, it is now in interstellar space.",
-            "Neutron stars can spin over 700 times per second. A sugar-cube of neutron star material weighs billions of tons.",
-            "Tardigrades can survive the vacuum of space, extreme radiation, and temperatures near absolute zero.",
-            "The Great Attractor is a gravitational anomaly pulling galaxies, including ours, toward an unseen mass.",
-            "Saturn's moon Titan has liquid methane lakes and a thick nitrogen atmosphere — a world of cold hydrocarbons.",
-            "The Wow! Signal, detected in 1977, remains the strongest candidate for an extraterrestrial radio transmission.",
-            "There are more possible iterations of a game of chess than atoms in the observable universe.",
-            "Dark matter makes up ~27% of the universe, yet we cannot see it — only its gravitational shadow."
+            "The first computer bug was an actual moth found in a Harvard Mark II relay in 1947.",
+            "The first 1KB of RAM cost more than a house in 1957. Today, a terabyte costs less than dinner.",
+            "TCP/IP was designed to survive a nuclear attack. The protocol is so robust it now runs on Mars rovers.",
+            "Git was created by Linus Torvalds in 2005 to manage the Linux kernel. It took him about two weeks to build.",
+            "The Apollo Guidance Computer had 4KB of RAM and ran at 0.043 MHz. Your phone is roughly a million times faster.",
+            "The first message sent over ARPANET was supposed to be 'LOGIN' but the system crashed after 'LO'.",
+            "There are more possible unique Git commit hashes (2^160) than atoms in a glass of water.",
+            "About 95% of the code in a modern production codebase is open-source dependencies you never audited."
         ];
 
-        const LIVE_RESEARCH_NOTE = "Live telemetry: a final report cannot be instant because the probe is actively scanning live networks, extracting source fragments, verifying signals, and cross-referencing intelligence in real time.";
+        const LIVE_RESEARCH_NOTE = "Live status: a final report takes time because the agent is actively searching the web, extracting sources, verifying claims, and cross-referencing results in real time.";
 
-        const HISTORY_KEY = "xenoCoreMissionLog";
+        const HISTORY_KEY = "researchAgentHistory";
 
         /* ===== CANVAS BACKGROUND ===== */
         function initVoidCanvas() {
@@ -1992,7 +1992,7 @@
             const startResearch = async () => {
                 const cleanTopic = topic.trim();
                 if (!cleanTopic) {
-                    setMessage("Enter a research directive first.");
+                    setMessage("Enter a research topic first.");
                     return;
                 }
                 setLoading(true);
@@ -2045,13 +2045,13 @@
                 h(HeroSection, { onScrollToWorkbench: () => {
                     document.getElementById("workbench")?.scrollIntoView({ behavior: "smooth" });
                 }}),
-                h(SectionDivider, { text: "Interface Online" }),
+                h(SectionDivider, { text: "Workbench" }),
                 h("section", { id: "workbench", className: "workbench" },
                     h("div", null,
                         h("section", { className: "control-panel panel reveal reveal-delay-1" },
                             h("div", { className: "search-prompt" }, "Start Here"),
                             h("div", { className: "control-grid" },
-                                field("Research Directive",
+                                field("Research Topic",
                                     h("input", {
                                         type: "text",
                                         className: "search-input",
@@ -2061,7 +2061,7 @@
                                         placeholder: "exoplanets, quantum biology, ancient civilizations..."
                                     })
                                 ),
-                                field("Signal Depth",
+                                field("Research Depth",
                                     h("div", { className: `select-shell ${mode === "fast" ? "disabled" : ""}` },
                                         h("select", {
                                             value: depth,
@@ -2071,11 +2071,11 @@
                                             h("option", { value: 1 }, "Surface (1)"),
                                             h("option", { value: 2 }, "Shallow (2)"),
                                             h("option", { value: 3 }, "Standard (3)"),
-                                            h("option", { value: 5 }, "Abyssal (5)")
+                                            h("option", { value: 5 }, "Deep (5)")
                                         )
                                     )
                                 ),
-                                field("Neural Core",
+                                field("Model",
                                     h("div", { className: "select-shell" },
                                         h("select", {
                                             value: model,
@@ -2106,14 +2106,14 @@
                                         disabled: mode === "fast",
                                         onChange: event => setVerify(event.target.checked)
                                     }),
-                                    "Cross-reference signal integrity"
+                                    "Cross-reference source integrity"
                                 ),
                                 h("button", {
                                     className: "primary-button",
                                     type: "button",
                                     disabled: loading,
                                     onClick: startResearch
-                                }, loading ? "Initializing..." : "Initiate Probe")
+                                }, loading ? "Initializing..." : "Start Research")
                             ),
                             message ? h("div", { className: "message" }, message) : null
                         ),
@@ -2121,7 +2121,7 @@
                             h("div", { className: "report-head" },
                                 h("div", { className: "report-title-row" },
                                     h("div", null,
-                                        h("h2", { className: "report-title" }, session ? session.topic : "No Active Signal"),
+                                        h("h2", { className: "report-title" }, session ? session.topic : "No Active Research"),
                                         h("div", { className: "phase-copy" }, `${activeMode.name} \u2014 ${activeMode.expected}`)
                                     ),
                                     h("div", { className: `status-pill ${session && session.status !== "completed" && session.status !== "failed" ? "pulse" : ""}` }, statusLabel(session))
@@ -2140,9 +2140,9 @@
                                 )
                             ),
                             h("div", { className: "view-tabs", ref: tabsRef },
-                                tabButton("report", "Intel Report", view, setView),
-                                tabButton("visuals", "Signal Analysis", view, setView),
-                                tabButton("evidence", `Data Fragments (${evidence.length})`, view, setView),
+                                tabButton("report", "Report", view, setView),
+                                tabButton("visuals", "Analysis", view, setView),
+                                tabButton("evidence", `Sources (${evidence.length})`, view, setView),
                                 h("div", { className: "tab-slider", style: sliderStyle })
                             ),
                             h("div", { className: "report-body" },
@@ -2151,7 +2151,7 @@
                         )
                     ),
                     h("aside", { className: "side-panel panel reveal reveal-delay-3" },
-                        h("h3", { className: "side-title" }, "System Status"),
+                        h("h3", { className: "side-title" }, "Status"),
                         h("div", { className: "phase-list" },
                             PHASES.map((phase, index) => h(PhaseItem, {
                                 key: phase.id,
@@ -2163,7 +2163,7 @@
                         h("div", { className: "stat-grid" },
                             h("div", { className: "stat" },
                                 h("div", { className: "stat-value" }, evidence.length),
-                                h("div", { className: "stat-label" }, "Fragments")
+                                h("div", { className: "stat-label" }, "Sources")
                             ),
                             h("div", { className: "stat" },
                                 h("div", { className: "stat-value" }, depth),
@@ -2171,22 +2171,22 @@
                             )
                         ),
                         h("div", { className: "possibilities" },
-                            h("h3", { className: "side-title" }, "System Directives"),
+                            h("h3", { className: "side-title" }, "How it works"),
                             h("p", { className: "possibility" },
-                                h("strong", null, "Beyond chat: "),
-                                "the core preserves source fragments and evidence instead of generating opaque summaries."
+                                h("strong", null, "Evidence-first: "),
+                                "the agent preserves raw sources and citations instead of generating opaque summaries."
                             ),
                             h("p", { className: "possibility" },
-                                h("strong", null, "Scan modes: "),
-                                "select sweep intensity based on mission parameters and time constraints."
+                                h("strong", null, "Depth modes: "),
+                                "select research intensity based on your time constraints."
                             ),
                             h("p", { className: "possibility" },
                                 h("strong", null, "Traceable output: "),
-                                "all reports, fragments, and mission logs remain in the archive for review."
+                                "all reports, sources, and search history remain in the archive for review."
                             )
                         ),
                         h("div", { className: "history-panel" },
-                            h("h3", { className: "side-title" }, "Mission Log"),
+                            h("h3", { className: "side-title" }, "History"),
                             history.length
                                 ? h("div", { className: "history-list" },
                                     history.map(item => h("button", {
@@ -2198,9 +2198,9 @@
                                         h("span", { className: "history-topic" }, item.topic),
                                         h("span", { className: "history-meta" }, `${modeName(item.mode)} \u2014 ${new Date(item.createdAt).toLocaleDateString()}`)
                                     )),
-                                    h("button", { type: "button", className: "clear-history", onClick: clearHistory }, "Purge mission log")
+                                    h("button", { type: "button", className: "clear-history", onClick: clearHistory }, "Clear history")
                                 )
-                                : h("p", { className: "possibility" }, "Past directives will appear in the archive.")
+                                : h("p", { className: "possibility" }, "Past searches will appear here.")
                         )
                     )
                 ),
@@ -2240,7 +2240,7 @@
 
             return h("section", { className: "hero" },
                 h("div", { className: "hero-content" },
-                    h("div", { className: "hero-glyph" }, "// A.R.A. //"),
+                    h("div", { className: "hero-glyph" }, "// Autonomous Research Agent //"),
                     h("h1", null,
                         h("span", { className: "hero-line glitch hero-entrance hero-entrance-delay-1", "data-text": "AUTONOMOUS" }, "AUTONOMOUS"),
                         h("span", { className: "hero-line hero-accent glitch hero-entrance hero-entrance-delay-2", "data-text": "RESEARCH" }, "RESEARCH"),
@@ -2257,7 +2257,7 @@
                     onClick: onScrollToWorkbench,
                     style: { background: "none", border: "none" }
                 },
-                    h("span", null, "Access Interface"),
+                    h("span", null, "Get Started"),
                     h("svg", { viewBox: "0 0 24 24" },
                         h("path", { d: "M12 5v14M5 12l7 7 7-7" })
                     )
@@ -2295,7 +2295,7 @@
 
         function modeName(mode) {
             const found = MODES.find(item => item.id === mode);
-            return found ? found.name : "Rapid Scan";
+            return found ? found.name : "Quick Run";
         }
 
         function tabButton(id, label, view, setView) {
@@ -2328,9 +2328,9 @@
         }
 
         function getProgress(session, depth) {
-            if (!session) return { value: 0, label: "Awaiting directive" };
-            if (session.status === "completed") return { value: 100, label: "Transmission complete" };
-            if (session.status === "failed") return { value: 100, label: "Signal lost" };
+            if (!session) return { value: 0, label: "Awaiting topic" };
+            if (session.status === "completed") return { value: 100, label: "Research complete" };
+            if (session.status === "failed") return { value: 100, label: "Research failed" };
             const phase1 = session.progress && session.progress.phase_1 ? session.progress.phase_1 : {};
             const phase2 = session.progress && session.progress.phase_2 ? session.progress.phase_2 : {};
             const evidenceCount = session.evidence_count || 0;
@@ -2338,15 +2338,15 @@
             const researchPart = Math.min(45, Math.round((iterations / Math.max(depth, 1)) * 45));
             if (session.phase === "phase_1") {
                 const bonus = evidenceCount > 0 ? 10 : 0;
-                return { value: Math.min(55, 8 + researchPart + bonus), label: "Acquiring fragments" };
+                return { value: Math.min(55, 8 + researchPart + bonus), label: "Collecting sources" };
             }
             if (session.phase === "phase_2") {
                 const verified = phase2.claims_verified || 0;
                 const verifyPart = Math.min(25, Math.round((verified / Math.max(evidenceCount, 1)) * 25));
-                return { value: Math.min(80, 55 + verifyPart), label: "Verifying signals" };
+                return { value: Math.min(80, 55 + verifyPart), label: "Verifying sources" };
             }
-            if (session.phase === "phase_3") return { value: 88, label: "Synthesizing intel" };
-            if (session.phase === "phase_4") return { value: 96, label: "Finalizing transmission" };
+            if (session.phase === "phase_3") return { value: 88, label: "Writing report" };
+            if (session.phase === "phase_4") return { value: 96, label: "Finalizing" };
             return { value: 5, label: "Initializing" };
         }
 
@@ -2354,9 +2354,9 @@
             if (!session) return "Standby";
             const labels = {
                 planning: "Planning",
-                executing: "Scanning",
+                executing: "Researching",
                 verifying: "Verifying",
-                generating: "Synthesizing",
+                generating: "Writing",
                 completed: "Complete",
                 failed: "Failed",
             };
@@ -2366,7 +2366,7 @@
         function renderMainContent({ session, report, view, evidence, errors }) {
             if (session && session.status === "failed") {
                 return h("div", { className: "error-box" },
-                    errors.length ? errors.join(" ") : "The probe failed before a report could be synthesized."
+                    errors.length ? errors.join(" ") : "The research failed before a report could be generated."
                 );
             }
             if (view === "visuals") return renderVisualGuide(session, evidence);
@@ -2374,8 +2374,8 @@
                 if (!evidence.length) {
                     return h("div", { className: "empty-state" },
                         h("div", null,
-                            h("strong", null, "Awaiting Fragments"),
-                            h("span", null, "Data fragments will stream in as the probe operates.")
+                            h("strong", null, "Awaiting Sources"),
+                            h("span", null, "Sources will stream in as the agent works.")
                         )
                     );
                 }
@@ -2401,8 +2401,8 @@
             }
             return h("div", { className: "empty-state" },
                 h("div", null,
-                    h("strong", null, "Awaiting Directive"),
-                    h("span", null, "Input a topic to deploy the probe into the digital void.")
+                    h("strong", null, "Awaiting Topic"),
+                    h("span", null, "Enter a topic to start research.")
                 )
             );
         }
@@ -2425,19 +2425,19 @@
                 return h("div", { className: "empty-state", style: { position: "relative" } },
                     h("div", { className: "scan-sweep" }),
                     h("div", { style: { position: "relative", zIndex: 1 } },
-                        h("strong", null, "Rapid sweep in progress"),
-                        h("span", null, evidence.length ? `${evidence.length} fragments acquired.` : "Sensor arrays warming up.")
+                        h("strong", null, "Quick run in progress"),
+                        h("span", null, evidence.length ? `${evidence.length} sources acquired.` : "Search warming up.")
                     )
                 );
             }
             return h("div", { className: "empty-state", style: { position: "relative" } },
                 h("div", { className: "scan-sweep" }),
                 h("div", { className: "cook-card", style: { position: "relative", zIndex: 1 } },
-                    h("div", { className: "cook-kicker" }, mode === "deep" ? "Deep probe active" : "Standard survey active"),
+                    h("div", { className: "cook-kicker" }, mode === "deep" ? "Deep dive active" : "Standard run active"),
                     h("div", { className: "cook-title" }, pickForSession(COOK_LINES, session, 0)),
                     h("div", { className: "cook-copy" },
                         evidence.length
-                            ? `${evidence.length} fragments acquired. ${LIVE_RESEARCH_NOTE}`
+                            ? `${evidence.length} sources acquired. ${LIVE_RESEARCH_NOTE}`
                             : `Sensors calibrating. ${LIVE_RESEARCH_NOTE}`
                     ),
                     h("div", { className: "fact-strip" },
@@ -2464,13 +2464,13 @@
                     newLines.push({ text: `Phase: ${phase.replace("phase_", "")} | Status: ${status}`, type: "active" });
                 }
                 if (evCount > prevEvidenceCount.current) {
-                    newLines.push({ text: `Fragment acquired [${evCount}]`, type: "done" });
+                    newLines.push({ text: `Source acquired [${evCount}]`, type: "done" });
                 }
                 if (phase === "phase_2" && prevPhase.current === "phase_1") {
-                    newLines.push({ text: "Verification sequence initiated", type: "warn" });
+                    newLines.push({ text: "Verification started", type: "warn" });
                 }
                 if (phase === "phase_3" && prevPhase.current === "phase_2") {
-                    newLines.push({ text: "Synthesis matrix engaged", type: "active" });
+                    newLines.push({ text: "Report writing started", type: "active" });
                 }
 
                 prevPhase.current = phase;
@@ -2483,7 +2483,7 @@
 
             if (lines.length === 0) {
                 return h("div", { className: "telemetry-feed" },
-                    h("div", { className: "telemetry-line", style: { animationDelay: "0s" } }, "Awaiting telemetry...")
+                    h("div", { className: "telemetry-line", style: { animationDelay: "0s" } }, "Awaiting updates...")
                 );
             }
 
@@ -2525,7 +2525,7 @@
         }
 
         function renderVisualGuide(session, evidence) {
-            const topic = session && session.topic ? session.topic : "your directive";
+            const topic = session && session.topic ? session.topic : "your topic";
             const captions = buildVisualCaptions(topic, evidence);
             return h("div", { className: "visual-grid" },
                 captions.map((card, index) => h("div", { className: "visual-card", key: card.title },
@@ -2549,22 +2549,22 @@
                 .slice(0, 3);
             return [
                 {
-                    title: "Primary Signal",
+                    title: "Main Finding",
                     copy: cleanClaims[0]
                         ? shorten(cleanClaims[0], 150)
-                        : `${topic} is the target object. The probe is collecting telemetry to map its structure.`
+                        : `${topic} is the focus. The agent is collecting sources to map the landscape.`
                 },
                 {
-                    title: "Key Variable",
+                    title: "Key Insight",
                     copy: cleanClaims[1]
                         ? shorten(cleanClaims[1], 150)
-                        : "Watch for forces, entities, events, or patterns that govern the target's behavior."
+                        : "Watch for trends, events, or patterns that shape the topic."
                 },
                 {
-                    title: "Strategic Value",
+                    title: "Why It Matters",
                     copy: cleanClaims[2]
                         ? shorten(cleanClaims[2], 150)
-                        : "The final brief converts raw fragments into structured intelligence with provenance."
+                        : "The final report converts raw sources into structured findings with citations."
                 }
             ];
         }
@@ -2577,7 +2577,7 @@
         async function loadReport(sessionId, setReport, setMessage) {
             try {
                 const response = await fetch(`${API_BASE}/api/research/${sessionId}/report-text`);
-                if (!response.ok) throw new Error("Report synthesized, but could not be loaded.");
+                if (!response.ok) throw new Error("Report generated, but could not be loaded.");
                 const data = await response.json();
                 setReport((data.content || "").trim());
             } catch (error) {

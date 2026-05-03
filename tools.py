@@ -287,8 +287,6 @@ async def synthesize_report(
         f"# {topic}\n"
         f"## Quick Picture\n"
         f"(2 short sentences explaining the topic like the reader is new)\n\n"
-        f"## Cartoon Map\n"
-        f"(3 short bullet points that could become simple cartoon panels)\n\n"
         f"## Key Ideas\n"
         f"(5 short bullets maximum, each with a citation)\n\n"
         f"## Simple Analogy\n"
@@ -517,12 +515,6 @@ def _build_fallback_report(topic: str, evidence_bank: List[Dict[str, Any]]) -> s
     )
     lines.extend([
         f"Here is the short version from {len(sources)} source{'s' if len(sources) != 1 else ''}. {summary_claims}",
-        "",
-        "## Cartoon Map",
-        "",
-        f"- Imagine {topic} as a big scene with a few important moving parts.",
-        "- Each source adds one labeled object to the scene.",
-        "- The most useful facts become the captions.",
         "",
         "## Key Ideas",
         "",
